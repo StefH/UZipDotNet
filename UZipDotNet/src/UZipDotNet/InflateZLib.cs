@@ -111,14 +111,14 @@ public class InflateZLib : InflateMethod
 					throw new ApplicationException("ZLIB file Adler32 test failed");
 
 			// close read file
-			ReadFile.Close();
+			ReadFile.Dispose();
 			ReadFile = null;
 
 			// save file length
 			WriteTotal = (UInt32) WriteStream.Length;
 
 			// close write file
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 
 			// successful exit
@@ -131,14 +131,14 @@ public class InflateZLib : InflateMethod
 			// close the read file if it is open
 			if(ReadFile != null)
 				{
-				ReadFile.Close();
+				ReadFile.Dispose();
 				ReadFile = null;
 				}
 
 			// close the write file if it is open
 			if(WriteFile != null)
 				{
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 				}
 

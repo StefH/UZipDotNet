@@ -135,11 +135,11 @@ public class DeflateZLib : DeflateMethod
 			WriteFile.Write((Byte) ReadAdler32);
 
 			// close read file
-			ReadFile.Close();
+			ReadFile.Dispose();
 			ReadFile = null;
 
 			// close write file
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 
 			// successful exit
@@ -152,14 +152,14 @@ public class DeflateZLib : DeflateMethod
 			// close the read file if it is open
 			if(ReadFile != null)
 				{
-				ReadFile.Close();
+				ReadFile.Dispose();
 				ReadFile = null;
 				}
 
 			// close the write file if it is open
 			if(WriteFile != null)
 				{
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 				}
 

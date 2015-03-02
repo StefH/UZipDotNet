@@ -144,7 +144,7 @@ public class InflateZipFile : InflateMethod
 		// close the read file if it is open
 		if(ReadFile != null)
 			{
-			ReadFile.Close();
+			ReadFile.Dispose();
 			ReadFile = null;
 			}
 
@@ -238,7 +238,7 @@ public class InflateZipFile : InflateMethod
 			WriteTotal = (UInt32) WriteStream.Length;
 
 			// close write file
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 
 			// if file times are available set the file time
@@ -272,7 +272,7 @@ public class InflateZipFile : InflateMethod
 			// close the write file if it is open
 			if(WriteFile != null)
 				{
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 				}
 

@@ -85,14 +85,14 @@ public class InflateNoHeader : InflateMethod
 			Decompress();
 
 			// close read file
-			ReadFile.Close();
+			ReadFile.Dispose();
 			ReadFile = null;
 
 			// save file length
 			WriteTotal = (UInt32) WriteStream.Length;
 
 			// close write file
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 
 			// successful exit
@@ -105,14 +105,14 @@ public class InflateNoHeader : InflateMethod
 			// close the read file if it is open
 			if(ReadFile != null)
 				{
-				ReadFile.Close();
+				ReadFile.Dispose();
 				ReadFile = null;
 				}
 
 			// close the write file if it is open
 			if(WriteFile != null)
 				{
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 				}
 

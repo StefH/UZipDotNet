@@ -186,7 +186,7 @@ public class DeflateZipFile : DeflateMethod
 			Compress();
 
 			// close read file
-			ReadFile.Close();
+			ReadFile.Dispose();
 			ReadFile = null;
 
 			// update zip file header with input file crc and compressed file length
@@ -202,7 +202,7 @@ public class DeflateZipFile : DeflateMethod
 			// close the read file if it is open
 			if(ReadFile != null)
 				{
-				ReadFile.Close();
+				ReadFile.Dispose();
 				ReadFile = null;
 				}
 
@@ -291,7 +291,7 @@ public class DeflateZipFile : DeflateMethod
 			if(ZipDir.Count == 0)
 				{
 				// close and delete the file
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 				File.Delete(WriteFileName);
 				}
@@ -304,7 +304,7 @@ public class DeflateZipFile : DeflateMethod
 				ZipFileDirectory();
 
 				// close file
-				WriteFile.Close();
+				WriteFile.Dispose();
 				WriteFile = null;
 
 				// clear directory
@@ -336,7 +336,7 @@ public class DeflateZipFile : DeflateMethod
 		try
 			{
 			// close and delete the file
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 			File.Delete(WriteFileName);
 			}
@@ -358,7 +358,7 @@ public class DeflateZipFile : DeflateMethod
 		// close the write file if it is open
 		if(WriteFile != null)
 			{
-			WriteFile.Close();
+			WriteFile.Dispose();
 			WriteFile = null;
 			}
 		return;

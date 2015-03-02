@@ -70,10 +70,11 @@ static public class Trace
 		TestSize();
 
 		// open or create the trace file
-		StreamWriter TraceFile = new StreamWriter(FileName, true);
+		// StreamWriter TraceFile = new StreamWriter(FileName, true);
+        StreamWriter TraceFile = new StreamWriter(File.Open(FileName, FileMode.OpenOrCreate, FileAccess.Write));
 
-		// get date and time
-		String DateTimeStr = String.Format("{0:yyyy}/{0:MM}/{0:dd} {0:HH}:{0:mm}:{0:ss} ", DateTime.Now);
+            // get date and time
+            String DateTimeStr = String.Format("{0:yyyy}/{0:MM}/{0:dd} {0:HH}:{0:mm}:{0:ss} ", DateTime.Now);
 
 		// write date and time
 		TraceFile.Write(DateTimeStr);
@@ -82,7 +83,7 @@ static public class Trace
 		TraceFile.WriteLine(Message);
 
 		// close the file
-		TraceFile.Close();
+		TraceFile.Dispose();
 
 		// exit
 		return;
@@ -140,7 +141,7 @@ static public class Trace
 		TraceFile.SetLength(NewFileLength - j);
 
 		// close the file
-		TraceFile.Close();
+		TraceFile.Dispose();
 
 		// exit
 		return;
