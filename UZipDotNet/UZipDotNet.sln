@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.22512.0
+# Visual Studio 2013
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{9DDE1F9D-0679-4A7F-8846-CEDEAF5CD773}"
 EndProject
@@ -13,6 +13,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	EndProjectSection
 EndProject
 Project("{8BB2217D-0F2D-49D1-97BC-3654ED321F3B}") = "UZipDotNet.ConsoleApp", "src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.kproj", "{0CBD4AEB-BEA2-4921-92A3-EDC0FC0F4BC7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UZipDotNet.VS2013", "src\UZipDotNet.VS2013\UZipDotNet.VS2013.csproj", "{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UZipDotNet.ConsoleApp.VS2013", "src\UZipDotNet.ConsoleApp.VS2013\UZipDotNet.ConsoleApp.VS2013.csproj", "{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -28,6 +32,14 @@ Global
 		{0CBD4AEB-BEA2-4921-92A3-EDC0FC0F4BC7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0CBD4AEB-BEA2-4921-92A3-EDC0FC0F4BC7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0CBD4AEB-BEA2-4921-92A3-EDC0FC0F4BC7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -35,5 +47,7 @@ Global
 	GlobalSection(NestedProjects) = preSolution
 		{9439FCA7-27FD-4562-8747-898709167557} = {9DDE1F9D-0679-4A7F-8846-CEDEAF5CD773}
 		{0CBD4AEB-BEA2-4921-92A3-EDC0FC0F4BC7} = {9DDE1F9D-0679-4A7F-8846-CEDEAF5CD773}
+		{1F331F5F-4A0A-4AC1-B4F9-9F60CC3E85CD} = {9DDE1F9D-0679-4A7F-8846-CEDEAF5CD773}
+		{BD688C3B-D3DD-4CE8-8AB2-50BCFD5DF81D} = {9DDE1F9D-0679-4A7F-8846-CEDEAF5CD773}
 	EndGlobalSection
 EndGlobal

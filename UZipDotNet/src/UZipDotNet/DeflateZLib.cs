@@ -28,203 +28,186 @@
 using System;
 using System.IO;
 using System.Text;
+using UZipDotNet.Support;
 
 namespace UZipDotNet
 {
-public class DeflateZLib : DeflateMethod
-	{
-	public  String[]		ExceptionStack;
+    public class DeflateZLib : DeflateMethod, IDeflateFile
+    {
+        private String _readFileName;
+        private FileStream _readStream;
+        private BinaryReader _readFile;
+        private UInt32 _readRemain;
+        private UInt32 _readAdler32;
 
-	private String			ReadFileName;
-	private FileStream		ReadStream;
-	private BinaryReader	ReadFile;
-	private UInt32			ReadRemain;
-	private UInt32			ReadAdler32;
+        private String _writeFileName;
+        private FileStream _writeStream;
+        private BinaryWriter _writeFile;
 
-	private String			WriteFileName;
-	private FileStream		WriteStream;
-	private BinaryWriter	WriteFile;
+        private static readonly int[] CompLevelTable = { 0, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
 
-	private static Int32[]	CompLevelTable  = { 0, 1, 1, 1, 2, 2, 2, 3, 3, 3 };
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeflateZLib"/> class.
+        /// </summary>
+        public DeflateZLib() : base(DefaultCompression) { }
 
-	////////////////////////////////////////////////////////////////////
-	// Constructor
-	////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeflateZLib"/> class.
+        /// </summary>
+        /// <param name="compLevel">The comp level.</param>
+        public DeflateZLib(int compLevel) : base(compLevel) { }
 
-	public DeflateZLib() : base(DefaultCompression) {}
-	public DeflateZLib(Int32 CompLevel) : base(CompLevel) {}
-		
-	////////////////////////////////////////////////////////////////////
-	// Decompress one file
-	////////////////////////////////////////////////////////////////////
-	
-	public Boolean Compress
-			(
-			String		ReadFileName,
-			String		WriteFileName
-			)
-		{
-		try
-			{
-			// save read file name
-			this.ReadFileName = ReadFileName;
+        /// <summary>
+        /// Compress one file
+        /// </summary>
+        /// <param name="readFileName">Name of the read file.</param>
+        /// <param name="writeFileName">Name of the write file.</param>
+        /// <returns></returns>
+        /// <exception cref="UZipDotNet.Exception">No support for files over 4GB</exception>
+        public void Compress(string readFileName, string writeFileName)
+        {
+            try
+            {
+                // save read file name
+                _readFileName = readFileName;
 
-			// open source file for reading
-			ReadStream = new FileStream(ReadFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-		
-			// convert stream to binary reader
-			ReadFile = new BinaryReader(ReadStream, Encoding.UTF8);
+                // open source file for reading
+                _readStream = new FileStream(readFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-			// file is too long
-			if(ReadStream.Length > (Int64) 0xffffffff) throw new ApplicationException("No support for files over 4GB");
+                // convert stream to binary reader
+                _readFile = new BinaryReader(_readStream, Encoding.UTF8);
 
-			// uncompressed file length
-			ReadRemain = (UInt32) ReadStream.Length;
+                // file is too long
+                if (_readStream.Length > 0xffffffff) throw new Exception("No support for files over 4GB");
 
-			// reset adler32 checksum
-			ReadAdler32 = 1;
+                // uncompressed file length
+                _readRemain = (uint) _readStream.Length;
 
-			// save name
-			this.WriteFileName = WriteFileName;
+                // reset adler32 checksum
+                _readAdler32 = 1;
 
-			// create destination file
-			WriteStream = new FileStream(WriteFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // save name
+                _writeFileName = writeFileName;
 
-			// convert stream to binary writer
-			WriteFile = new BinaryWriter(WriteStream, Encoding.UTF8);
+                // create destination file
+                _writeStream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
-			// Header is made out of 16 bits [iiiicccclldxxxxx]
-			// iiii is compression information. It is WindowBit - 8 in this case 7. iiii = 0111
-			// cccc is compression method. Deflate (8 dec) or Store (0 dec)
-			// The first byte is 0x78 for deflate and 0x70 for store
-			// ll is compression level 0 to 3 (CompLevelTable translates between user level of 0-9 to header level of 0-3)
-			// d is preset dictionary. The preset dictionary is not supported by this program. d is always 0
-			// xxx is 5 bit check sum
-			Int32 Header = (0x78 << 8) | (CompLevelTable[CompressionLevel] << 6);
-			Header += 31 - (Header % 31);
+                // convert stream to binary writer
+                _writeFile = new BinaryWriter(_writeStream, Encoding.UTF8);
 
-			// write two bytes in most significant byte first
-			WriteFile.Write((Byte) (Header >> 8));
-			WriteFile.Write((Byte) Header);
+                // Header is made out of 16 bits [iiiicccclldxxxxx]
+                // iiii is compression information. It is WindowBit - 8 in this case 7. iiii = 0111
+                // cccc is compression method. Deflate (8 dec) or Store (0 dec)
+                // The first byte is 0x78 for deflate and 0x70 for store
+                // ll is compression level 0 to 3 (CompLevelTable translates between user level of 0-9 to header level of 0-3)
+                // d is preset dictionary. The preset dictionary is not supported by this program. d is always 0
+                // xxx is 5 bit check sum
+                int header = (0x78 << 8) | (CompLevelTable[CompressionLevel] << 6);
+                header += 31 - (header%31);
 
-			// compress the file
-			Compress();
+                // write two bytes in most significant byte first
+                _writeFile.Write((byte) (header >> 8));
+                _writeFile.Write((byte) header);
 
-			// compress function was stored
-			if(CompFunction == CompFunc.Stored)
-				{
-				// set file position to header
-				WriteStream.Position = 0;
+                // compress the file
+                Compress();
 
-				// change compression method from Deflate(8) to Stored(0)
-				Header = (0x70 << 8) | (CompLevelTable[CompressionLevel] << 6);
-				Header += 31 - (Header % 31);
+                // compress function was stored
+                if (CompFunction == CompFunc.Stored)
+                {
+                    // set file position to header
+                    _writeStream.Position = 0;
 
-				// write two bytes in most significant byte first
-				WriteFile.Write((Byte) (Header >> 8));
-				WriteFile.Write((Byte) Header);
+                    // change compression method from Deflate(8) to Stored(0)
+                    header = (0x70 << 8) | (CompLevelTable[CompressionLevel] << 6);
+                    header += 31 - (header%31);
 
-				// restore file position
-				WriteStream.Position = WriteStream.Length;
-				}
+                    // write two bytes in most significant byte first
+                    _writeFile.Write((byte) (header >> 8));
+                    _writeFile.Write((byte) header);
 
-			// ZLib checksum is Adler32 write it big endian order, high byte first
-			WriteFile.Write((Byte) (ReadAdler32 >> 24));
-			WriteFile.Write((Byte) (ReadAdler32 >> 16));
-			WriteFile.Write((Byte) (ReadAdler32 >> 8));
-			WriteFile.Write((Byte) ReadAdler32);
+                    // restore file position
+                    _writeStream.Position = _writeStream.Length;
+                }
 
-			// close read file
-			ReadFile.Dispose();
-			ReadFile = null;
+                // ZLib checksum is Adler32 write it big endian order, high byte first
+                _writeFile.Write((byte) (_readAdler32 >> 24));
+                _writeFile.Write((byte) (_readAdler32 >> 16));
+                _writeFile.Write((byte) (_readAdler32 >> 8));
+                _writeFile.Write((byte) _readAdler32);
+            }
+            finally
+            {
+                Dispose();
+            }
+        }
 
-			// close write file
-			WriteFile.Dispose();
-			WriteFile = null;
+        /// <summary>
+        /// Read Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        /// <param name="endOfFile">if set to <c>true</c> [end of file].</param>
+        /// <returns></returns>
+        protected override int ReadBytes(byte[] buffer, int pos, int len, out bool endOfFile)
+        {
+            len = len > _readRemain ? (int)_readRemain : len;
+            _readRemain -= (uint)len;
+            endOfFile = _readRemain == 0;
+            _readFile.Read(buffer, pos, len);
+            _readAdler32 = Adler32.Checksum(_readAdler32, buffer, pos, len);
 
-			// successful exit
-			return(false);
-			}
+            return (len);
+        }
 
-		// make sure read and write files are closed
-		catch(Exception Ex)
-			{
-			// close the read file if it is open
-			if(ReadFile != null)
-				{
-				ReadFile.Dispose();
-				ReadFile = null;
-				}
+        /// <summary>
+        ///  Write Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        protected override void WriteBytes(byte[] buffer, int pos, int len)
+        {
+            _writeFile.Write(buffer, pos, len);
+        }
 
-			// close the write file if it is open
-			if(WriteFile != null)
-				{
-				WriteFile.Dispose();
-				WriteFile = null;
-				}
+        /// <summary>
+        /// Rewind Streams
+        /// </summary>
+        protected override void RewindStreams()
+        {
+            // reposition stream file pointer to start of file
+            _readStream.Position = 0;
 
-			// error exit
-			ExceptionStack = ExceptionReport.GetMessageAndStack(this, Ex);
-			return(true);
-			}
-		}
+            // uncompressed file length
+            _readRemain = (uint)_readStream.Length;
 
-	////////////////////////////////////////////////////////////////////
-	// Read Bytes Routine
-	////////////////////////////////////////////////////////////////////
+            // reset adler32 checksum
+            _readAdler32 = 1;
 
-	public override Int32 ReadBytes
-			(
-			Byte[]			Buffer,
-			Int32			Pos,
-			Int32			Len,
-			out Boolean		EndOfFile
-			)
-		{
-		Len = Len > ReadRemain ? (Int32) ReadRemain : Len;
-		ReadRemain -= (UInt32) Len;
-		EndOfFile = ReadRemain == 0;
-		ReadFile.Read(Buffer, Pos, Len);
-		ReadAdler32 = Adler32.Checksum(ReadAdler32, Buffer, Pos,  Len);
-		return(Len);
-		}
-	
-	////////////////////////////////////////////////////////////////////
-	// Write Bytes Routine
-	////////////////////////////////////////////////////////////////////
+            // truncate file keeping the zlib header
+            _writeStream.SetLength(2);
 
-	public override void WriteBytes
-			(
-			Byte[]		Buffer,
-			Int32		Pos,
-			Int32		Len
-			)
-		{
-		WriteFile.Write(Buffer, Pos, Len);
-		return;
-		}
+            // reposition write stream to the new end of file
+            _writeStream.Position = 2;
+        }
 
-	////////////////////////////////////////////////////////////////////
-	// Rewind Streams
-	////////////////////////////////////////////////////////////////////
+        public override void Dispose()
+        {
+            // close the read file if it is open
+            if (_readFile != null)
+            {
+                _readFile.Dispose();
+                _readFile = null;
+            }
 
-	public override void RewindStreams()
-		{
-		// reposition stream file pointer to start of file
-		ReadStream.Position = 0;
-
-		// uncompressed file length
-		ReadRemain = (UInt32) ReadStream.Length;
-
-		// reset adler32 checksum
-		ReadAdler32 = 1;
-
-		// truncate file keeping the zlib header
-		WriteStream.SetLength(2);
-
-		// reposition write stream to the new end of file
-		WriteStream.Position = 2;
-		return;
-		}
-	}
+            // close the write file if it is open
+            if (_writeFile != null)
+            {
+                _writeFile.Dispose();
+                _writeFile = null;
+            }
+        }
+    }
 }

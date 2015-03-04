@@ -28,158 +28,157 @@
 using System;
 using System.IO;
 using System.Text;
+using UZipDotNet.Support;
 
 namespace UZipDotNet
 {
-public class InflateZLib : InflateMethod
-	{
-	public  String[]		ExceptionStack;
-	public  UInt32			ReadTotal;
-	public  UInt32			WriteTotal;
+    public class InflateZLib : InflateMethod
+    {
+        public String[] ExceptionStack;
+        public uint ReadTotal;
+        public uint WriteTotal;
 
-	private String			ReadFileName;
-	private FileStream		ReadStream;
-	private BinaryReader	ReadFile;
-	private UInt32			ReadRemain;
+        private String _readFileName;
+        private FileStream _readStream;
+        private BinaryReader _readFile;
+        private uint _readRemain;
 
-	private String			WriteFileName;
-	private FileStream		WriteStream;
-	private BinaryWriter	WriteFile;
-	private UInt32			WriteAdler32;
+        private String _writeFileName;
+        private FileStream _writeStream;
+        private BinaryWriter _writeFile;
+        private uint _writeAdler32;
 
-	////////////////////////////////////////////////////////////////////
-	// Decompress one file
-	////////////////////////////////////////////////////////////////////
-	
-	public Boolean Decompress
-			(
-			String		ReadFileName,
-			String		WriteFileName
-			)
-		{
-		try
-			{
-			// save name
-			this.ReadFileName = ReadFileName;
+        /// <summary>
+        /// Decompress one file
+        /// </summary>
+        /// <param name="readFileName">Name of the read file.</param>
+        /// <param name="writeFileName">Name of the write file.</param>
+        /// <returns></returns>
+        /// <exception cref="UZipDotNet.Exception">
+        /// No support for files over 4GB
+        /// or
+        /// ZLIB file header is in error
+        /// or
+        /// ZLIB file Adler32 test failed
+        /// </exception>
+        public void DecompressFile(string readFileName, string writeFileName)
+        {
+            try
+            {
+                // save name
+                _readFileName = readFileName;
 
-			// open source file for reading
-			ReadStream = new FileStream(ReadFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-		
-			// convert stream to binary reader
-			ReadFile = new BinaryReader(ReadStream, Encoding.UTF8);
+                // open source file for reading
+                _readStream = new FileStream(readFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-			// file is too long
-			if(ReadStream.Length > (Int64) 0xffffffff) throw new ApplicationException("No support for files over 4GB");
+                // convert stream to binary reader
+                _readFile = new BinaryReader(_readStream, Encoding.UTF8);
 
-			// compressed part of the file
-			// we subtract 2 bytes for header and 4 bytes for adler32 checksum
-			ReadRemain = (UInt32) ReadStream.Length - 6;
-			ReadTotal = ReadRemain;
+                // file is too long
+                if (_readStream.Length > 0xffffffff) throw new Exception("No support for files over 4GB");
 
-			// get ZLib header
-			Int32 Header = (ReadFile.ReadByte() << 8) | ReadFile.ReadByte();
+                // compressed part of the file
+                // we subtract 2 bytes for header and 4 bytes for adler32 checksum
+                _readRemain = (uint)_readStream.Length - 6;
+                ReadTotal = _readRemain;
 
-			// test header: chksum, compression method must be deflated, no support for external dictionary
-			if(Header % 31 != 0 || (Header & 0xf00) != 0x800 && (Header & 0xf00) != 0 || (Header & 0x20) != 0)
-				throw new ApplicationException("ZLIB file header is in error");
+                // get ZLib header
+                int header = (_readFile.ReadByte() << 8) | _readFile.ReadByte();
 
-			// save name
-			this.WriteFileName = WriteFileName;
+                // test header: chksum, compression method must be deflated, no support for external dictionary
+                if (header % 31 != 0 || (header & 0xf00) != 0x800 && (header & 0xf00) != 0 || (header & 0x20) != 0)
+                    throw new Exception("ZLIB file header is in error");
 
-			// create destination file
-			WriteStream = new FileStream(WriteFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // save name
+                _writeFileName = writeFileName;
 
-			// convert stream to binary writer
-			WriteFile = new BinaryWriter(WriteStream, Encoding.UTF8);
+                // create destination file
+                _writeStream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
-			// reset adler32 checksum
-			WriteAdler32 = 1;
+                // convert stream to binary writer
+                _writeFile = new BinaryWriter(_writeStream, Encoding.UTF8);
 
-			// decompress the file
-			if((Header & 0xf00) == 0x800)
-				{
-				Decompress();
-				}
-			else
-				{
-				NoCompression();
-				}
+                // reset adler32 checksum
+                _writeAdler32 = 1;
 
-			// ZLib checksum is Adler32
-			if((((UInt32) ReadFile.ReadByte() << 24) | ((UInt32) ReadFile.ReadByte() << 16) |
-				((UInt32) ReadFile.ReadByte() << 8) | ((UInt32) ReadFile.ReadByte())) != WriteAdler32)
-					throw new ApplicationException("ZLIB file Adler32 test failed");
+                // decompress the file
+                if ((header & 0xf00) == 0x800)
+                {
+                    Decompress();
+                }
+                else
+                {
+                    NoCompression();
+                }
 
-			// close read file
-			ReadFile.Dispose();
-			ReadFile = null;
+                // ZLib checksum is Adler32
+                if ((((uint)_readFile.ReadByte() << 24) | ((uint)_readFile.ReadByte() << 16) |
+                    ((uint)_readFile.ReadByte() << 8) | (_readFile.ReadByte())) != _writeAdler32)
+                    throw new Exception("ZLIB file Adler32 test failed");
 
-			// save file length
-			WriteTotal = (UInt32) WriteStream.Length;
+                // close read file
+                _readFile.Dispose();
+                _readFile = null;
 
-			// close write file
-			WriteFile.Dispose();
-			WriteFile = null;
+                // save file length
+                WriteTotal = (uint)_writeStream.Length;
 
-			// successful exit
-			return(false);
-			}
+                // close write file
+                _writeFile.Dispose();
+                _writeFile = null;
+            }
+            catch (Exception)
+            {
+                Dispose();
 
-		// make sure read and write files are closed
-		catch(Exception Ex)
-			{
-			// close the read file if it is open
-			if(ReadFile != null)
-				{
-				ReadFile.Dispose();
-				ReadFile = null;
-				}
+                throw;
+            }
+        }
 
-			// close the write file if it is open
-			if(WriteFile != null)
-				{
-				WriteFile.Dispose();
-				WriteFile = null;
-				}
+        /// <summary>
+        /// Read Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        /// <param name="endOfFile">if set to <c>true</c> [end of file].</param>
+        /// <returns></returns>
+        protected override int ReadBytes(byte[] buffer, int pos, int len, out bool endOfFile)
+        {
+            len = len > _readRemain ? (int)_readRemain : len;
+            _readRemain -= (uint)len;
+            endOfFile = _readRemain == 0;
 
-			// error exit
-			ExceptionStack = ExceptionReport.GetMessageAndStack(this, Ex);
-			return(true);
-			}
-		}
+            return (_readFile.Read(buffer, pos, len));
+        }
 
-	////////////////////////////////////////////////////////////////////
-	// Read Bytes Routine
-	////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Write Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        protected override void WriteBytes(byte[] buffer, int pos, int len)
+        {
+            _writeAdler32 = Adler32.Checksum(_writeAdler32, buffer, pos, len);
+            _writeFile.Write(buffer, pos, len);
+        }
 
-	public override Int32 ReadBytes
-			(
-			Byte[]			Buffer,
-			Int32			Pos,
-			Int32			Len,
-			out Boolean		EndOfFile
-			)
-		{
-		Len = Len > ReadRemain ? (Int32) ReadRemain : Len;
-		ReadRemain -= (UInt32) Len;
-		EndOfFile = ReadRemain == 0;
-		return(ReadFile.Read(Buffer, Pos, Len));
-		}
-	
-	////////////////////////////////////////////////////////////////////
-	// Write Bytes Routine
-	////////////////////////////////////////////////////////////////////
+        public override void Dispose()
+        {
+            // close the read file if it is open
+            if (_readFile != null)
+            {
+                _readFile.Dispose();
+                _readFile = null;
+            }
 
-	public override void WriteBytes
-			(
-			Byte[]		Buffer,
-			Int32		Pos,
-			Int32		Len
-			)
-		{
-		WriteAdler32 = Adler32.Checksum(WriteAdler32, Buffer, Pos,  Len);
-		WriteFile.Write(Buffer, Pos, Len);
-		return;
-		}
-	}
+            // close the write file if it is open
+            if (_writeFile != null)
+            {
+                _writeFile.Dispose();
+                _writeFile = null;
+            }
+        }
+    }
 }

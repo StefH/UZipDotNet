@@ -29,151 +29,143 @@ using System.Text;
 
 namespace UZipDotNet
 {
-public class DeflateNoHeader : DeflateMethod
-	{
-	public  String[]		ExceptionStack;
+    public class DeflateNoHeader : DeflateMethod
+    {
+        public string[] ExceptionStack;
 
-	private String			ReadFileName;
-	private FileStream		ReadStream;
-	private BinaryReader	ReadFile;
-	private UInt32			ReadRemain;
+        private string _readFileName;
+        private FileStream _readStream;
+        private BinaryReader _readFile;
+        private UInt32 _readRemain;
 
-	private String			WriteFileName;
-	private FileStream		WriteStream;
-	private BinaryWriter	WriteFile;
+        private string _writeFileName;
+        private FileStream _writeStream;
+        private BinaryWriter _writeFile;
 
-	////////////////////////////////////////////////////////////////////
-	// Constructor
-	////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeflateNoHeader"/> class.
+        /// </summary>
+        public DeflateNoHeader() : base(DefaultCompression) { }
 
-	public DeflateNoHeader() : base(DefaultCompression) {}
-	public DeflateNoHeader(Int32 CompLevel) : base(CompLevel) {}
-		
-	////////////////////////////////////////////////////////////////////
-	// Compress one file
-	////////////////////////////////////////////////////////////////////
-	
-	public Boolean Compress
-			(
-			String		ReadFileName,
-			String		WriteFileName
-			)
-		{
-		try
-			{
-			// save name
-			this.ReadFileName = ReadFileName;
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeflateNoHeader"/> class.
+        /// </summary>
+        /// <param name="compLevel">The comp level.</param>
+        public DeflateNoHeader(int compLevel) : base(compLevel) { }
 
-			// open source file for reading
-			ReadStream = new FileStream(ReadFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-		
-			// convert stream to binary reader
-			ReadFile = new BinaryReader(ReadStream, Encoding.UTF8);
+        /// <summary>
+        /// Compress one file
+        /// </summary>
+        /// <param name="readFileName">Name of the read file.</param>
+        /// <param name="writeFileName">Name of the write file.</param>
+        /// <returns></returns>
+        /// <exception cref="System.Exception">No support for files over 4GB</exception>
+        public void Compress(string readFileName, string writeFileName)
+        {
+            try
+            {
+                // save name
+                _readFileName = readFileName;
 
-			// file is too long
-			if(ReadStream.Length > (Int64) 0xffffffff) throw new ApplicationException("No support for files over 4GB");
+                // open source file for reading
+                _readStream = new FileStream(readFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-			// uncompressed file length
-			ReadRemain = (UInt32) ReadStream.Length;
+                // convert stream to binary reader
+                _readFile = new BinaryReader(_readStream, Encoding.UTF8);
 
-			// save name
-			this.WriteFileName = WriteFileName;
+                // file is too long
+                if (_readStream.Length > 0xffffffff) throw new Exception("No support for files over 4GB"); // TODO throw IOException ?
 
-			// create destination file
-			WriteStream = new FileStream(WriteFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // uncompressed file length
+                _readRemain = (UInt32)_readStream.Length;
 
-			// convert stream to binary writer
-			WriteFile = new BinaryWriter(WriteStream, Encoding.UTF8);
+                // save name
+                _writeFileName = writeFileName;
 
-			// compress the file (function defind in DeflateMethod the base class)
-			Compress();
+                // create destination file
+                _writeStream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
-			// close read file
-			ReadFile.Dispose();
-			ReadFile = null;
+                // convert stream to binary writer
+                _writeFile = new BinaryWriter(_writeStream, Encoding.UTF8);
 
-			// close write file
-			WriteFile.Dispose();
-			WriteFile = null;
+                // compress the file (function defind in DeflateMethod the base class)
+                Compress();
 
-			// successful exit
-			return(false);
-			}
+                // close read file
+                _readFile.Dispose();
+                _readFile = null;
 
-		// make sure read and write files are closed
-		catch(Exception Ex)
-			{
-			// close the read file if it is open
-			if(ReadFile != null)
-				{
-				ReadFile.Dispose();
-				ReadFile = null;
-				}
+                // close write file
+                _writeFile.Dispose();
+                _writeFile = null;
+            }
+            catch (Exception)
+            {
+                // close the read file if it is open
+                if (_readFile != null)
+                {
+                    _readFile.Dispose();
+                    _readFile = null;
+                }
 
-			// close the write file if it is open
-			if(WriteFile != null)
-				{
-				WriteFile.Dispose();
-				WriteFile = null;
-				}
+                // close the write file if it is open
+                if (_writeFile != null)
+                {
+                    _writeFile.Dispose();
+                    _writeFile = null;
+                }
 
-			// error exit
-			ExceptionStack = ExceptionReport.GetMessageAndStack(this, Ex);
-			return(true);
-			}
-		}
+                throw;
+            }
+        }
 
-	////////////////////////////////////////////////////////////////////
-	// Read Bytes Routine
-	////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Read Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        /// <param name="endOfFile">if set to <c>true</c> [end of file].</param>
+        /// <returns></returns>
+        protected override int ReadBytes(byte[] buffer, int pos, int len, out bool endOfFile)
+        {
+            len = len > _readRemain ? (int)_readRemain : len;
+            _readRemain -= (uint)len;
+            endOfFile = _readRemain == 0;
+            return (_readFile.Read(buffer, pos, len));
+        }
 
-	public override Int32 ReadBytes
-			(
-			Byte[]			Buffer,
-			Int32			Pos,
-			Int32			Len,
-			out Boolean		EndOfFile
-			)
-		{
-		Len = Len > ReadRemain ? (Int32) ReadRemain : Len;
-		ReadRemain -= (UInt32) Len;
-		EndOfFile = ReadRemain == 0;
-		return(ReadFile.Read(Buffer, Pos, Len));
-		}
-	
-	////////////////////////////////////////////////////////////////////
-	// Write Bytes Routine
-	////////////////////////////////////////////////////////////////////
+        /// <summary>
+        /// Write Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        protected override void WriteBytes(byte[] buffer, int pos, int len)
+        {
+            _writeFile.Write(buffer, pos, len);
+        }
 
-	public override void WriteBytes
-			(
-			Byte[]		Buffer,
-			Int32		Pos,
-			Int32		Len
-			)
-		{
-		WriteFile.Write(Buffer, Pos, Len);
-		return;
-		}
+        /// <summary>
+        /// Rewind input and output stream
+        /// </summary>
+        protected override void RewindStreams()
+        {
+            // reposition stream file pointer to start of file
+            _readStream.Position = 0;
 
-	////////////////////////////////////////////////////////////////////
-	// Rewind Streams
-	////////////////////////////////////////////////////////////////////
+            // uncompressed file length
+            _readRemain = (uint)_readStream.Length;
 
-	public override void RewindStreams()
-		{
-		// reposition stream file pointer to start of file
-		ReadStream.Position = 0;
+            // truncate file
+            _writeStream.SetLength(0);
 
-		// uncompressed file length
-		ReadRemain = (UInt32) ReadStream.Length;
+            // reposition write stream to the new end of file
+            _writeStream.Position = 0;
+        }
 
-		// truncate file
-		WriteStream.SetLength(0);
-
-		// reposition write stream to the new end of file
-		WriteStream.Position = 0;
-		return;
-		}
-	}
+        public override void Dispose()
+        {
+        }
+    }
 }

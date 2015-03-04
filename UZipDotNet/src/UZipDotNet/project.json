@@ -1,5 +1,5 @@
 ﻿{
-    "version": "0.0.1.2",
+    "version": "0.0.2.0",
     "authors": [ "Uzi Granot", "Stef Heyenrath" ],
     "dependencies": {
     },
@@ -12,8 +12,7 @@
         "aspnetcore50": {
             "dependencies": {
                 "System.Runtime": "4.0.20-beta-22416",
-
-                "System.Text.Encoding": "4.0.10-beta-22627",
+                "System.Text.Encoding": "4.0.10-beta-22231",
                 "System.Console": "4.0.0-beta-22416",
                 "System.IO": "4.0.10-beta-22416",
                 "System.IO.FileSystem": "4.0.0-beta-22416",

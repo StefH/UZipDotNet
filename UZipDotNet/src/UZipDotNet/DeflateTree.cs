@@ -27,599 +27,576 @@
 /////////////////////////////////////////////////////////////////////
 
 using System;
-using System.Collections.Generic;
+using UZipDotNet.Support;
+
 
 namespace UZipDotNet
 {
-public delegate void WriteBits(Int32 Bits, Int32 Count);
-
-/////////////////////////////////////////////////////////////////////
-// Frequency Node
-// This class is used to calculate the Huffman coding
-// base on frequency
-/////////////////////////////////////////////////////////////////////
-
-public struct FreqNode : IComparable<FreqNode>
-	{
-	public Int32	Code;
-	public Int32	Freq;
-	public Int32	Child;	// left child is Child - 1
-
-	public Int32 CompareTo
-			(
-			FreqNode Other
-			)
-		{
-		return(this.Freq - Other.Freq);
-		}
-	}
-
-/////////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////////
-
-public class DeflateTree
-	{
-	private const Int32		RepeatSymbol_3_6 = 16;
-	private const Int32		RepeatSymbol_3_10 = 17;
-	private const Int32		RepeatSymbol_11_138 = 18;
-
-	private static Int32[]	BitLengthOrder = {RepeatSymbol_3_6, RepeatSymbol_3_10, RepeatSymbol_11_138,
-											  0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15};
-
-	public  Int32[]			CodeFreq;			// number of times a given code was used
-	public  Int32			MaxUsedCodes;		// the number of highest code used plus one
-
-	private FreqNode[]		FreqTree;			// frequency tree
-	private Int32			FreqTreeEnd;		// number of nodes in the frequency tree
-	private Int32			MaxUsedBitLen;		// maximum used bit length
-
-	private UInt16[]		Codes;				// dynamic or static variable length bit code
-	private Byte[]			CodeLength;			// dynamic or static code length
-	private Int32[]			BitLengthFreq;		// frequency of code length (how many times code length is used)
-	private Int32[]			FirstCode;			// first code of a group of equal code length
-	private UInt16[]		SaveCodes;			// dynamic variable length bit code
-	private Byte[]			SaveCodeLength;		// dynamic code length
-
-	private WriteBits		WriteBits;			// write bits method (void WriteBits(Int32 Bits, Int32 Count))
-	private Int32			MinCodes;			// minimum number of codes
-	private Int32			MaxCodes;			// maximum number of codes
-	private Int32			MaxBitLength;		// maximum length in bits of a code
-
-	////////////////////////////////////////////////////////////////////
-	// Constructor
-	////////////////////////////////////////////////////////////////////
-	//					Literal Tree		MinCodes = 257, MaxCodes = 286, MaxBitLength = 15
-	//					Distance Tree		MinCodes =   2, MaxCodes =  30, MaxBitLength = 15
-	//					Bit Length Tree		MinCodes =   4, MaxCodes =  19, MaxBitLength = 7
-	public DeflateTree(WriteBits WriteBits, Int32 MinCodes, Int32 MaxCodes, Int32 MaxBitLength)
-		{
-		// write bits method
-		this.WriteBits = WriteBits;
-
-		// save minimum codes, maximum codes, and maximum bit length
-		this.MinCodes = MinCodes;
-		this.MaxCodes = MaxCodes;
-		this.MaxBitLength = MaxBitLength;
-
-		// allocate arrays
-		CodeFreq = new Int32[MaxCodes];
-		SaveCodeLength = new Byte[MaxCodes];
-		SaveCodes = new UInt16[MaxCodes];
-		FreqTree  = new FreqNode[2 * MaxCodes - 1];
-		BitLengthFreq = new Int32[MaxBitLength];
-		FirstCode = new Int32[MaxBitLength];
-
-		// clear arrays
-		Reset();
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Reset class after each block
-	////////////////////////////////////////////////////////////////////
-
-	public void Reset()
-		{
-		// The deflate method will overwrite the CodeLength and Codes arrays
-		// if static block was selected. We restore it to the dynamic arrays
-		CodeLength = SaveCodeLength;
-		Codes = SaveCodes;
-
-		// clear code frequency array
-		Array.Clear(CodeFreq, 0, CodeFreq.Length);
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Write symbol to output stream
-	////////////////////////////////////////////////////////////////////
-
-	public void WriteSymbol(Int32 code)
-		{
-		WriteBits(Codes[code], CodeLength[code]);
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// For static trees overwrite the Codes and CodeLength arrays
-	// the reset function will restore the dynamic arrays
-	////////////////////////////////////////////////////////////////////
-
-	public void SetStaticCodes
-			(
-			UInt16[]	StaticCodes,
-			Byte[]		StaticLength
-			)
-		{
-		Codes = StaticCodes;
-		CodeLength = StaticLength;
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Build Huffman tree
-	////////////////////////////////////////////////////////////////////
-
-	public void BuildTree()
-		{
-		// find the highest code in use
-		for(MaxUsedCodes = MaxCodes - 1; MaxUsedCodes >= MinCodes && CodeFreq[MaxUsedCodes] == 0; MaxUsedCodes--);
-		MaxUsedCodes++;
-
-		// clear frequency tree
-		Array.Clear(FreqTree, 0, FreqTree.Length);
-
-		// initialize Huffman frequency tree with leaf nodes
-		FreqTreeEnd = 0;
-		for(Int32 Code = 0; Code < MaxUsedCodes; Code++)
-			{
-			// include used codes. ignore codes with zero frequency
-			if(CodeFreq[Code] != 0)
-				{
-				FreqTree[FreqTreeEnd].Code = Code;
-				FreqTree[FreqTreeEnd++].Freq = CodeFreq[Code];
-				}
-			}
-
-		// there are less than 2 codes in use
-		if(FreqTreeEnd < 2)
-			{
-			// zero codes in use
-			if(FreqTreeEnd == 0)
-				{
-				// create artificial node of code 0 with zero frequency
-				FreqTree[0].Code = 0;
-				FreqTree[0].Freq = 0;
-				FreqTreeEnd++;
-				}
-			// one code in use
-			// create artificial second node
-			// if the first code is 0 the second is 1, if the first is non zero make the second zero
-			// the frequency is zero (not used)
-			FreqTree[1].Code = FreqTree[0].Code == 0 ? 1 : 0;
-			FreqTree[1].Freq = 0;
-			FreqTreeEnd++;
-			}
-
-		// sort it by frequency low to high
-		Array.Sort(FreqTree, 0, FreqTreeEnd);
-
-		// clear code length
-		Array.Clear(CodeLength, 0, CodeLength.Length);
-
-		// loop in case of bit length exceeding the maximum
-		// for literals and distance it is 15 and for bit length it is 7
-		for(;;)
-			{
-			// build Huffman tree by combining pairs of nodes
-			CombinePairs();
-
-			// calculate length in bits of each code
-			MaxUsedBitLen = 0;
-			BuildCodeTree(FreqTreeEnd - 1, 0);
-			if(MaxUsedBitLen <= MaxBitLength) break;
-
-			// adjust the lowest frequency nodes such that we get a flater tree
-			AdjustNodes();
-			}
-
-		// exit
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Combine pairs of lower frequency node to a parent node
-	////////////////////////////////////////////////////////////////////
-
-	private void CombinePairs()
-		{
-		// combine pairs of nodes
-		for(Int32 Ptr = 2; Ptr < FreqTreeEnd; Ptr += 2)
-			{
-			// combined frequency of current pair
-			Int32 CombFreq = FreqTree[Ptr - 2].Freq + FreqTree[Ptr - 1].Freq;
-
-			// right pointer
-			Int32 RightPtr = FreqTreeEnd;
-
-			// set left pointer to starting point
-			Int32 LeftPtr = Ptr;
-
-			// perform binary search
-			Int32 InsertPtr;
-			Int32 Cmp;
-			for(;;)
-				{
-				// middle pointer
-				InsertPtr = (LeftPtr + RightPtr) / 2;
-
-				// compare
-				Cmp = CombFreq - FreqTree[InsertPtr].Freq;
-
-				// range is one or exact match
-				if(InsertPtr == LeftPtr || Cmp == 0) break;
-
-				// move search to the right
-				if(Cmp > 0) LeftPtr = InsertPtr;
-
-				// move search to the left
-				else RightPtr = InsertPtr;
-				}
-
-			// exact compare (point to end of a group of equal frequencies)
-			// positive compare (move to the right as long as it is equal)
-			if(Cmp >= 0)
-				{
-				for(InsertPtr++; InsertPtr < FreqTreeEnd && FreqTree[InsertPtr].Freq == CombFreq; InsertPtr++);
-				}
-
-			// open a hole at insert point
-			Array.Copy(FreqTree, InsertPtr, FreqTree, InsertPtr + 1, FreqTreeEnd - InsertPtr);
-			FreqTreeEnd++;
-
-			// add node with combined freqency
-			FreqTree[InsertPtr].Code = -1;
-			FreqTree[InsertPtr].Freq = CombFreq;
-			FreqTree[InsertPtr].Child = Ptr - 1;
-			}
-
-		// add final root node with combined freqency
-		FreqTree[FreqTreeEnd].Code = -1;
-		FreqTree[FreqTreeEnd].Freq = FreqTree[FreqTreeEnd - 2].Freq + FreqTree[FreqTreeEnd - 1].Freq;
-		FreqTree[FreqTreeEnd].Child = FreqTreeEnd - 1;
-		FreqTreeEnd++;
-
-		// exit
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Scan the tree using recursive routine and set the number
-	// of bits to represent the code
-	////////////////////////////////////////////////////////////////////
-
-	private void BuildCodeTree
-			(
-			Int32		Ptr,
-			Int32		BitCount
-			)
-		{
-		FreqNode FN = FreqTree[Ptr];
-
-		// we are at a parent node
-		if(FN.Code < 0)
-			{
-			// go to children on the left side of this node
-			BuildCodeTree(FN.Child - 1, BitCount + 1);
-
-			// go to children on the right side of this node
-			BuildCodeTree(FN.Child, BitCount + 1);
-			}
-
-		// we are at child node
-		else
-			{
-			if(BitCount > MaxUsedBitLen) MaxUsedBitLen = BitCount;
-			CodeLength[FN.Code] = (Byte) BitCount;
-			}
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Adjust low frequancy nodes to make the tree more symetric
-	////////////////////////////////////////////////////////////////////
-
-	public void AdjustNodes()
-		{
-		// remove all non leaf nodes
-		Int32 Ptr;
-		for(Ptr = 0; Ptr < FreqTreeEnd; Ptr++)
-			{
-			if(FreqTree[Ptr].Code >= 0) continue;
-			FreqTreeEnd--;
-			Array.Copy(FreqTree, Ptr + 1, FreqTree, Ptr, FreqTreeEnd - Ptr);
-			Ptr--;
-			}
-
-		// look for first change in frequency
-		Int32 Freq = FreqTree[0].Freq;
-		for(Ptr = 1; Ptr < FreqTreeEnd && FreqTree[Ptr].Freq == Freq; Ptr++);
-		if(Ptr == FreqTreeEnd) throw new ApplicationException("Adjust nodes failed");
-
-		// adjust the frequency of least frequent nodes
-		Freq = FreqTree[Ptr].Freq;
-		for(Ptr--; Ptr >= 0; Ptr--) FreqTree[Ptr].Freq = Freq;
-		return; 
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Build code array from bit length frequency distribution
-	////////////////////////////////////////////////////////////////////
-
-	public void BuildCodes()
-		{
-		// build bit length frequency array
-		Array.Clear(BitLengthFreq, 0, BitLengthFreq.Length);
-		for(Int32 Code = 0; Code < MaxUsedCodes; Code++)
-			{
-			if(CodeLength[Code] != 0) BitLengthFreq[CodeLength[Code] - 1]++;
-			}
-
-		// build array of initial code for each block of codes
-		Int32 InitCode = 0;
-		for(Int32 BitNo = 0; BitNo < MaxBitLength; BitNo++)
-			{
-			// save the initial code of the block
-			FirstCode[BitNo] = InitCode;
-
-			// advance the code by the frequancy times 2 to the power of 15 less bit length
-			InitCode += BitLengthFreq[BitNo] << (15 - BitNo);
-			}
-
-		// it must add up to 2 ** 16
-		if(InitCode != 65536) throw new ApplicationException("Inconsistent bl_counts!");
-
-		// now fill up the entire code array
-		Array.Clear(Codes, 0, Codes.Length);
-		for(Int32 Index = 0; Index < MaxUsedCodes; Index++)
-			{
-			Int32 Bits = CodeLength[Index];
-			if(Bits > 0)
-				{
-				Codes[Index] = BitReverse.Reverse16Bits(FirstCode[Bits - 1]);
-				FirstCode[Bits - 1] += 1 << (16 - Bits);
-				}
-			}
-
-		// exit
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// calculate encoded data block length
-	////////////////////////////////////////////////////////////////////
-
-	public Int32 GetEncodedLength()
-		{
-		Int32 Len = 0;
-		for(Int32 Index = 0; Index < MaxUsedCodes; Index++) Len += CodeFreq[Index] * CodeLength[Index];
-		return(Len);
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Bit length tree only. Calculate total length
-	////////////////////////////////////////////////////////////////////
-
-	public Int32 MaxUsedCodesBitLength()
-		{
-		// calculate length in bits of bit length tree
-		for(Int32 Index = 18; Index >= 4; Index--) if(CodeLength[BitLengthOrder[Index]] > 0) return(Index + 1);
-		return(4);
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Bit length tree only. Calculate total length
-	////////////////////////////////////////////////////////////////////
-
-	public void WriteBitLengthCodeLength
-			(
-			Int32	blTreeCodes
-			)
-		{
-		// send to output stream the bit length array
-		for(Int32 Rank = 0; Rank < blTreeCodes; Rank++) WriteBits(CodeLength[BitLengthOrder[Rank]], 3);
-		return;
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// calculate Bit Length frequency
-	///	0 - 15: Represent code lengths of 0 - 15
-	//	16: Copy the previous code length 3 - 6 times.
-	//		The next 2 bits indicate repeat length
-	//		(0 = 3, ... , 3 = 6)
-	//		Example:  Codes 8, 16 (+2 bits 11), 16 (+2 bits 10) will expand to
-	//		12 code lengths of 8 (1 + 6 + 5)
-	//	17: Repeat a code length of 0 for 3 - 10 times. (3 bits of length)
-	//	18: Repeat a code length of 0 for 11 - 138 times. (7 bits of length)
-	////////////////////////////////////////////////////////////////////
-
-	public Int32 CalcBLFreq
-			(
-			DeflateTree blTree
-			)
-		{
-		Int32 ExtraBits = 0;
-		for(Int32 Code = 0; Code < MaxUsedCodes;)
-			{
-			// current code length
-			Int32 CodeLen = CodeLength[Code];
-
-			// scan the code array for equal code lengths
-			Int32 Count = 1;
-			for(Code++; Code < MaxUsedCodes && CodeLen == CodeLength[Code]; Code++) Count++;
-
-			// less than three equal code length
-			if(Count < 3)
-				{
-				blTree.CodeFreq[CodeLen] += (Int16) Count;
-				continue;
-				}
-
-			// code length is other than zero
-			if(CodeLen != 0)
-				{
-				// add one to the frequency of the code itself
-				blTree.CodeFreq[CodeLen]++;
-
-				// reduce the count by one
-				Count--;
-
-				// for every full block of 6 repeats add one REP_3_6 code
-				blTree.CodeFreq[RepeatSymbol_3_6] += Count / 6;
-				ExtraBits += 2 * (Count / 6);
-
-				// get the remainder
-				if((Count = Count % 6) == 0) continue;
-
-				// remainder is less than 3
-				if(Count < 3)
-					{
-					blTree.CodeFreq[CodeLen] += Count;
-					continue;
-					}
-
-				// remainder is beween 3 to 5
-				blTree.CodeFreq[RepeatSymbol_3_6]++;
-				ExtraBits += 2;
-				continue;
-				}
-
-			// code length is zero and count is 3 or more
-			// for every full block of 138 repeats add one REP_11_138 code
-			blTree.CodeFreq[RepeatSymbol_11_138] += Count / 138;
-			ExtraBits += 7 * (Count / 138);
-
-			// get the remainder
-			if((Count = Count % 138) == 0) continue;
-
-			// remainder is less than 3
-			if(Count < 3)
-				{
-				blTree.CodeFreq[CodeLen] += Count;
-				continue;
-				}
-
-			// remainder is beween 3 to 10
-			if(Count <= 10)
-				{
-				blTree.CodeFreq[RepeatSymbol_3_10]++;
-				ExtraBits += 3;
-				continue;
-				}
-
-			// remainder is beween 11 to 137
-			blTree.CodeFreq[RepeatSymbol_11_138]++;
-			ExtraBits += 7;
-			}
-		return(ExtraBits);
-		}
-
-	////////////////////////////////////////////////////////////////////
-	// Write the tree to output file
-	////////////////////////////////////////////////////////////////////
-
-	public void WriteTree
-			(
-			DeflateTree blTree
-			)
-		{
-		for(Int32 Code = 0; Code < MaxUsedCodes;)
-			{
-			// current code length
-			Int32 CodeLen = CodeLength[Code];
-
-			// scan the code array for equal code lengths
-			Int32 Count = 1;
-			for(Code++; Code < MaxUsedCodes && CodeLen == CodeLength[Code]; Code++) Count++;
-
-			// less than three equal code length
-			if(Count < 3)
-				{
-				// write the first code length to output file
-				blTree.WriteSymbol(CodeLen);
-
-				// write the second code length to output file
-				if(Count > 1) blTree.WriteSymbol(CodeLen);
-				continue;
-				}
-
-			// Used code. Code length is other than zero.
-			if(CodeLen != 0)
-				{
-				// write the code length to output file
-				blTree.WriteSymbol(CodeLen);
-
-				// reduce the count by one
-				Count--;
-
-				// for every full block of 6 repeats add one REP_3_6 code and two bits of 1 (11)
-				for(Int32 Index = Count / 6; Index > 0; Index--)
-					{
-					blTree.WriteSymbol(RepeatSymbol_3_6);
-					WriteBits(6 - 3, 2);
-					}
-
-				// get the remainder
-				if((Count = Count % 6) == 0) continue;
-
-				// remainder is less than 3
-				if(Count < 3)
-					{
-					// write the code length to output file
-					blTree.WriteSymbol(CodeLen);
-					if(Count > 1) blTree.WriteSymbol(CodeLen);
-					continue;
-					}
-
-				// remainder is beween 3 to 5
-				blTree.WriteSymbol(RepeatSymbol_3_6);
-				WriteBits(Count - 3, 2);
-				continue;
-				}
-
-			// code length is zero and count is 3 or more
-			// for every full block of 138 repeats add one REP_11_138 code plus 7 bits of 1
-			for(Int32 Index = Count / 138; Index > 0; Index--)
-				{
-				blTree.WriteSymbol(RepeatSymbol_11_138);
-				WriteBits(138 - 11, 7);
-				}
-
-			// get the remainder
-			if((Count = Count % 138) == 0) continue;
-
-			// remainder is less than 3
-			if(Count < 3)
-				{
-				// write the code length to output file
-				blTree.WriteSymbol(CodeLen);
-				if(Count > 1) blTree.WriteSymbol(CodeLen);
-				continue;
-				}
-
-			// remainder is beween 3 to 10
-			if(Count <= 10)
-				{
-				blTree.WriteSymbol(RepeatSymbol_3_10);
-				WriteBits(Count - 3, 3);
-				continue;
-				}
-
-			// remainder is beween 11 to 137
-			blTree.WriteSymbol(RepeatSymbol_11_138);
-			WriteBits(Count - 11, 7);
-			}
-		return;
-		}
-	}
+    public delegate void WriteBits(int bits, int count);
+
+    /// <summary>
+    /// This class is used to calculate the Huffman coding based on frequency
+    /// </summary>
+    public struct FreqNode : IComparable<FreqNode>
+    {
+        public int Code;
+        public int Freq;
+        public int Child;	// left child is Child - 1
+
+        public int CompareTo(FreqNode other)
+        {
+            return (Freq - other.Freq);
+        }
+    }
+
+    /////////////////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////////////////
+
+    public class DeflateTree
+    {
+        private const int RepeatSymbol_3_6 = 16;
+        private const int RepeatSymbol_3_10 = 17;
+        private const int RepeatSymbol_11_138 = 18;
+
+        private static readonly int[] BitLengthOrder =
+        {
+            RepeatSymbol_3_6, RepeatSymbol_3_10, RepeatSymbol_11_138, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15
+        };
+
+        public int[] CodeFreq;			// number of times a given code was used
+        public int MaxUsedCodes;		// the number of highest code used plus one
+
+        private readonly FreqNode[] _freqTree;  // frequency tree
+        private int _freqTreeEnd;		// number of nodes in the frequency tree
+        private int _maxUsedBitLen;		// maximum used bit length
+
+        private ushort[] _codes;				// dynamic or static variable length bit code
+        private byte[] _codeLength;			    // dynamic or static code length
+        private readonly int[] _bitLengthFreq;  // frequency of code length (how many times code length is used)
+        private readonly int[] _firstCode;      // first code of a group of equal code length
+        private readonly ushort[] _saveCodes;   // dynamic variable length bit code
+        private readonly byte[] _saveCodeLength;    // dynamic code length
+
+        private readonly WriteBits _writeBits;  // write bits method (void WriteBits(Int32 Bits, Int32 Count))
+        private readonly int _minCodes;			// minimum number of codes
+        private readonly int _maxCodes;			// maximum number of codes
+        private readonly int _maxBitLength;		// maximum length in bits of a code
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="DeflateTree"/> class.
+        /// Literal Tree		MinCodes = 257, MaxCodes = 286, MaxBitLength = 15
+        /// Distance Tree		MinCodes =   2, MaxCodes =  30, MaxBitLength = 15
+        /// Bit Length Tree		MinCodes =   4, MaxCodes =  19, MaxBitLength = 7
+        /// </summary>
+        /// <param name="writeBits">The write bits.</param>
+        /// <param name="minCodes">The minimum codes.</param>
+        /// <param name="maxCodes">The maximum codes.</param>
+        /// <param name="maxBitLength">Maximum length of the bit.</param>
+        public DeflateTree(WriteBits writeBits, int minCodes, int maxCodes, int maxBitLength)
+        {
+            // write bits method
+            _writeBits = writeBits;
+
+            // save minimum codes, maximum codes, and maximum bit length
+            _minCodes = minCodes;
+            _maxCodes = maxCodes;
+            _maxBitLength = maxBitLength;
+
+            // allocate arrays
+            CodeFreq = new int[maxCodes];
+            _saveCodeLength = new byte[maxCodes];
+            _saveCodes = new ushort[maxCodes];
+            _freqTree = new FreqNode[2 * maxCodes - 1];
+            _bitLengthFreq = new int[maxBitLength];
+            _firstCode = new int[maxBitLength];
+
+            // clear arrays
+            Reset();
+        }
+
+        /// <summary>
+        ///  Reset class after each block
+        /// </summary>
+        public void Reset()
+        {
+            // The deflate method will overwrite the CodeLength and Codes arrays
+            // if static block was selected. We restore it to the dynamic arrays
+            _codeLength = _saveCodeLength;
+            _codes = _saveCodes;
+
+            // clear code frequency array
+            Array.Clear(CodeFreq, 0, CodeFreq.Length);
+        }
+
+        /// <summary>
+        /// Write symbol to output stream
+        /// </summary>
+        /// <param name="code">The code.</param>
+        public void WriteSymbol(int code)
+        {
+            _writeBits(_codes[code], _codeLength[code]);
+        }
+
+        ////////////////////////////////////////////////////////////////////
+        // For static trees overwrite the Codes and CodeLength arrays
+        // the reset function will restore the dynamic arrays
+        ////////////////////////////////////////////////////////////////////
+
+        public void SetStaticCodes(ushort[] staticCodes, byte[] staticLength)
+        {
+            _codes = staticCodes;
+            _codeLength = staticLength;
+        }
+
+        /// <summary>
+        /// BBuild Huffman tree
+        /// </summary>
+        public void BuildTree()
+        {
+            // find the highest code in use
+            for (MaxUsedCodes = _maxCodes - 1; MaxUsedCodes >= _minCodes && CodeFreq[MaxUsedCodes] == 0; MaxUsedCodes--)
+            {
+            }
+
+            MaxUsedCodes++;
+
+            // clear frequency tree
+            Array.Clear(_freqTree, 0, _freqTree.Length);
+
+            // initialize Huffman frequency tree with leaf nodes
+            _freqTreeEnd = 0;
+            for (int code = 0; code < MaxUsedCodes; code++)
+            {
+                // include used codes. ignore codes with zero frequency
+                if (CodeFreq[code] != 0)
+                {
+                    _freqTree[_freqTreeEnd].Code = code;
+                    _freqTree[_freqTreeEnd++].Freq = CodeFreq[code];
+                }
+            }
+
+            // there are less than 2 codes in use
+            if (_freqTreeEnd < 2)
+            {
+                // zero codes in use
+                if (_freqTreeEnd == 0)
+                {
+                    // create artificial node of code 0 with zero frequency
+                    _freqTree[0].Code = 0;
+                    _freqTree[0].Freq = 0;
+                    _freqTreeEnd++;
+                }
+                // one code in use
+                // create artificial second node
+                // if the first code is 0 the second is 1, if the first is non zero make the second zero
+                // the frequency is zero (not used)
+                _freqTree[1].Code = _freqTree[0].Code == 0 ? 1 : 0;
+                _freqTree[1].Freq = 0;
+                _freqTreeEnd++;
+            }
+
+            // sort it by frequency low to high
+            Array.Sort(_freqTree, 0, _freqTreeEnd);
+
+            // clear code length
+            Array.Clear(_codeLength, 0, _codeLength.Length);
+
+            // loop in case of bit length exceeding the maximum
+            // for literals and distance it is 15 and for bit length it is 7
+            for (; ; )
+            {
+                // build Huffman tree by combining pairs of nodes
+                CombinePairs();
+
+                // calculate length in bits of each code
+                _maxUsedBitLen = 0;
+                BuildCodeTree(_freqTreeEnd - 1, 0);
+                if (_maxUsedBitLen <= _maxBitLength) break;
+
+                // adjust the lowest frequency nodes such that we get a flater tree
+                AdjustNodes();
+            }
+        }
+
+        /// <summary>
+        /// Combine pairs of lower frequency node to a parent nodeCombines the pairs.
+        /// </summary>
+        private void CombinePairs()
+        {
+            // combine pairs of nodes
+            for (int ptr = 2; ptr < _freqTreeEnd; ptr += 2)
+            {
+                // combined frequency of current pair
+                int combFreq = _freqTree[ptr - 2].Freq + _freqTree[ptr - 1].Freq;
+
+                // right pointer
+                int rightPtr = _freqTreeEnd;
+
+                // set left pointer to starting point
+                int leftPtr = ptr;
+
+                // perform binary search
+                int insertPtr;
+                int cmp;
+                for (; ; )
+                {
+                    // middle pointer
+                    insertPtr = (leftPtr + rightPtr) / 2;
+
+                    // compare
+                    cmp = combFreq - _freqTree[insertPtr].Freq;
+
+                    // range is one or exact match
+                    if (insertPtr == leftPtr || cmp == 0) break;
+
+                    // move search to the right
+                    if (cmp > 0) leftPtr = insertPtr;
+
+                    // move search to the left
+                    else rightPtr = insertPtr;
+                }
+
+                // exact compare (point to end of a group of equal frequencies)
+                // positive compare (move to the right as long as it is equal)
+                if (cmp >= 0)
+                {
+                    for (insertPtr++; insertPtr < _freqTreeEnd && _freqTree[insertPtr].Freq == combFreq; insertPtr++)
+                    {
+                    }
+                }
+
+                // open a hole at insert point
+                Array.Copy(_freqTree, insertPtr, _freqTree, insertPtr + 1, _freqTreeEnd - insertPtr);
+                _freqTreeEnd++;
+
+                // add node with combined freqency
+                _freqTree[insertPtr].Code = -1;
+                _freqTree[insertPtr].Freq = combFreq;
+                _freqTree[insertPtr].Child = ptr - 1;
+            }
+
+            // add final root node with combined freqency
+            _freqTree[_freqTreeEnd].Code = -1;
+            _freqTree[_freqTreeEnd].Freq = _freqTree[_freqTreeEnd - 2].Freq + _freqTree[_freqTreeEnd - 1].Freq;
+            _freqTree[_freqTreeEnd].Child = _freqTreeEnd - 1;
+            _freqTreeEnd++;
+        }
+
+        /// <summary>
+        /// Scan the tree using recursive routine and set the number of bits to represent the code
+        /// </summary>
+        /// <param name="ptr">The PTR.</param>
+        /// <param name="bitCount">The bit count.</param>
+        private void BuildCodeTree(int ptr, int bitCount)
+        {
+            FreqNode fn = _freqTree[ptr];
+
+            // we are at a parent node
+            if (fn.Code < 0)
+            {
+                // go to children on the left side of this node
+                BuildCodeTree(fn.Child - 1, bitCount + 1);
+
+                // go to children on the right side of this node
+                BuildCodeTree(fn.Child, bitCount + 1);
+            }
+
+            // we are at child node
+            else
+            {
+                if (bitCount > _maxUsedBitLen) _maxUsedBitLen = bitCount;
+                _codeLength[fn.Code] = (byte)bitCount;
+            }
+        }
+
+        /// <summary>
+        /// AAdjust low frequency nodes to make the tree more symetric
+        /// </summary>
+        /// <exception cref="System.Exception">Adjust nodes failed</exception>
+        public void AdjustNodes()
+        {
+            // remove all non leaf nodes
+            int ptr;
+            for (ptr = 0; ptr < _freqTreeEnd; ptr++)
+            {
+                if (_freqTree[ptr].Code >= 0) continue;
+                _freqTreeEnd--;
+                Array.Copy(_freqTree, ptr + 1, _freqTree, ptr, _freqTreeEnd - ptr);
+                ptr--;
+            }
+
+            // look for first change in frequency
+            int freq = _freqTree[0].Freq;
+            for (ptr = 1; ptr < _freqTreeEnd && _freqTree[ptr].Freq == freq; ptr++)
+            {
+            }
+            if (ptr == _freqTreeEnd) throw new Exception("Adjust nodes failed");
+
+            // adjust the frequency of least frequent nodes
+            freq = _freqTree[ptr].Freq;
+            for (ptr--; ptr >= 0; ptr--) _freqTree[ptr].Freq = freq;
+        }
+
+        /// <summary>
+        /// Build code array from bit length frequency distribution
+        /// </summary>
+        /// <exception cref="System.Exception">Inconsistent bl_counts!</exception>
+        public void BuildCodes()
+        {
+            // build bit length frequency array
+            Array.Clear(_bitLengthFreq, 0, _bitLengthFreq.Length);
+            for (int code = 0; code < MaxUsedCodes; code++)
+            {
+                if (_codeLength[code] != 0) _bitLengthFreq[_codeLength[code] - 1]++;
+            }
+
+            // build array of initial code for each block of codes
+            int initCode = 0;
+            for (int bitNo = 0; bitNo < _maxBitLength; bitNo++)
+            {
+                // save the initial code of the block
+                _firstCode[bitNo] = initCode;
+
+                // advance the code by the frequancy times 2 to the power of 15 less bit length
+                initCode += _bitLengthFreq[bitNo] << (15 - bitNo);
+            }
+
+            // it must add up to 2 ** 16
+            if (initCode != 65536) throw new Exception("Inconsistent bl_counts!");
+
+            // now fill up the entire code array
+            Array.Clear(_codes, 0, _codes.Length);
+            for (int index = 0; index < MaxUsedCodes; index++)
+            {
+                int bits = _codeLength[index];
+                if (bits > 0)
+                {
+                    _codes[index] = BitReverse.Reverse16Bits(_firstCode[bits - 1]);
+                    _firstCode[bits - 1] += 1 << (16 - bits);
+                }
+            }
+        }
+
+        /// <summary>
+        /// Calculate encoded data block lengthGets the length of the encoded.
+        /// </summary>
+        /// <returns></returns>
+        public int GetEncodedLength()
+        {
+            int len = 0;
+            for (int index = 0; index < MaxUsedCodes; index++) len += CodeFreq[index] * _codeLength[index];
+            return (len);
+        }
+
+        /// <summary>
+        /// Bit length tree only. Calculate total length
+        /// </summary>
+        /// <returns></returns>
+        public int MaxUsedCodesBitLength()
+        {
+            // calculate length in bits of bit length tree
+            for (int index = 18; index >= 4; index--)
+            {
+                if (_codeLength[BitLengthOrder[index]] > 0)
+                {
+                    return (index + 1);
+                }
+            }
+            return 4;
+        }
+
+        /// <summary>
+        /// Bit length tree only. Calculate total length
+        /// </summary>
+        /// <param name="blTreeCodes">The bl tree codes.</param>
+        public void WriteBitLengthCodeLength(Int32 blTreeCodes)
+        {
+            // send to output stream the bit length array
+            for (int rank = 0; rank < blTreeCodes; rank++)
+                _writeBits(_codeLength[BitLengthOrder[rank]], 3);
+        }
+
+        ////////////////////////////////////////////////////////////////////
+        // calculate Bit Length frequency
+        ///	0 - 15: Represent code lengths of 0 - 15
+        //	16: Copy the previous code length 3 - 6 times.
+        //		The next 2 bits indicate repeat length
+        //		(0 = 3, ... , 3 = 6)
+        //		Example:  Codes 8, 16 (+2 bits 11), 16 (+2 bits 10) will expand to
+        //		12 code lengths of 8 (1 + 6 + 5)
+        //	17: Repeat a code length of 0 for 3 - 10 times. (3 bits of length)
+        //	18: Repeat a code length of 0 for 11 - 138 times. (7 bits of length)
+        ////////////////////////////////////////////////////////////////////
+        public Int32 CalcBLFreq(DeflateTree blTree)
+        {
+            int extraBits = 0;
+            for (int code = 0; code < MaxUsedCodes; )
+            {
+                // current code length
+                int codeLen = _codeLength[code];
+
+                // scan the code array for equal code lengths
+                int count = 1;
+                for (code++; code < MaxUsedCodes && codeLen == _codeLength[code]; code++) count++;
+
+                // less than three equal code length
+                if (count < 3)
+                {
+                    blTree.CodeFreq[codeLen] += (short)count;
+                    continue;
+                }
+
+                // code length is other than zero
+                if (codeLen != 0)
+                {
+                    // add one to the frequency of the code itself
+                    blTree.CodeFreq[codeLen]++;
+
+                    // reduce the count by one
+                    count--;
+
+                    // for every full block of 6 repeats add one REP_3_6 code
+                    blTree.CodeFreq[RepeatSymbol_3_6] += count / 6;
+                    extraBits += 2 * (count / 6);
+
+                    // get the remainder
+                    if ((count = count % 6) == 0) continue;
+
+                    // remainder is less than 3
+                    if (count < 3)
+                    {
+                        blTree.CodeFreq[codeLen] += count;
+                        continue;
+                    }
+
+                    // remainder is beween 3 to 5
+                    blTree.CodeFreq[RepeatSymbol_3_6]++;
+                    extraBits += 2;
+                    continue;
+                }
+
+                // code length is zero and count is 3 or more
+                // for every full block of 138 repeats add one REP_11_138 code
+                blTree.CodeFreq[RepeatSymbol_11_138] += count / 138;
+                extraBits += 7 * (count / 138);
+
+                // get the remainder
+                if ((count = count % 138) == 0) continue;
+
+                // remainder is less than 3
+                if (count < 3)
+                {
+                    blTree.CodeFreq[codeLen] += count;
+                    continue;
+                }
+
+                // remainder is beween 3 to 10
+                if (count <= 10)
+                {
+                    blTree.CodeFreq[RepeatSymbol_3_10]++;
+                    extraBits += 3;
+                    continue;
+                }
+
+                // remainder is beween 11 to 137
+                blTree.CodeFreq[RepeatSymbol_11_138]++;
+                extraBits += 7;
+            }
+            return (extraBits);
+        }
+
+        /// <summary>
+        /// Write the tree to output file
+        /// </summary>
+        /// <param name="blTree">The bl tree.</param>
+        public void WriteTree(DeflateTree blTree)
+        {
+            for (int code = 0; code < MaxUsedCodes; )
+            {
+                // current code length
+                int codeLen = _codeLength[code];
+
+                // scan the code array for equal code lengths
+                int count = 1;
+                for (code++; code < MaxUsedCodes && codeLen == _codeLength[code]; code++) count++;
+
+                // less than three equal code length
+                if (count < 3)
+                {
+                    // write the first code length to output file
+                    blTree.WriteSymbol(codeLen);
+
+                    // write the second code length to output file
+                    if (count > 1) blTree.WriteSymbol(codeLen);
+                    continue;
+                }
+
+                // Used code. Code length is other than zero.
+                if (codeLen != 0)
+                {
+                    // write the code length to output file
+                    blTree.WriteSymbol(codeLen);
+
+                    // reduce the count by one
+                    count--;
+
+                    // for every full block of 6 repeats add one REP_3_6 code and two bits of 1 (11)
+                    for (int index = count / 6; index > 0; index--)
+                    {
+                        blTree.WriteSymbol(RepeatSymbol_3_6);
+                        _writeBits(6 - 3, 2);
+                    }
+
+                    // get the remainder
+                    if ((count = count % 6) == 0) continue;
+
+                    // remainder is less than 3
+                    if (count < 3)
+                    {
+                        // write the code length to output file
+                        blTree.WriteSymbol(codeLen);
+                        if (count > 1) blTree.WriteSymbol(codeLen);
+                        continue;
+                    }
+
+                    // remainder is beween 3 to 5
+                    blTree.WriteSymbol(RepeatSymbol_3_6);
+                    _writeBits(count - 3, 2);
+                    continue;
+                }
+
+                // code length is zero and count is 3 or more
+                // for every full block of 138 repeats add one REP_11_138 code plus 7 bits of 1
+                for (int index = count / 138; index > 0; index--)
+                {
+                    blTree.WriteSymbol(RepeatSymbol_11_138);
+                    _writeBits(138 - 11, 7);
+                }
+
+                // get the remainder
+                if ((count = count % 138) == 0) continue;
+
+                // remainder is less than 3
+                if (count < 3)
+                {
+                    // write the code length to output file
+                    blTree.WriteSymbol(codeLen);
+                    if (count > 1) blTree.WriteSymbol(codeLen);
+                    continue;
+                }
+
+                // remainder is beween 3 to 10
+                if (count <= 10)
+                {
+                    blTree.WriteSymbol(RepeatSymbol_3_10);
+                    _writeBits(count - 3, 3);
+                    continue;
+                }
+
+                // remainder is beween 11 to 137
+                blTree.WriteSymbol(RepeatSymbol_11_138);
+                _writeBits(count - 11, 7);
+            }
+        }
+    }
 }

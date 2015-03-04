@@ -29,132 +29,130 @@ using System.Text;
 
 namespace UZipDotNet
 {
-public class InflateNoHeader : InflateMethod
-	{
-	public  String[]		ExceptionStack;
-	public  UInt32			ReadTotal;
-	public  UInt32			WriteTotal;
+    public class InflateNoHeader : InflateMethod
+    {
+        public uint ReadTotal;
+        public uint WriteTotal;
 
-	private String			ReadFileName;
-	private FileStream		ReadStream;
-	private BinaryReader	ReadFile;
-	private UInt32			ReadRemain;
+        private String _readFileName;
+        private FileStream _readStream;
+        private BinaryReader _readFile;
+        private uint _readRemain;
 
-	private String			WriteFileName;
-	private FileStream		WriteStream;
-	private BinaryWriter	WriteFile;
+        private String _writeFileName;
+        private FileStream _writeStream;
+        private BinaryWriter _writeFile;
 
-	////////////////////////////////////////////////////////////////////
-	// Decompress one file
-	////////////////////////////////////////////////////////////////////
-	
-	public Boolean Decompress
-			(
-			String		ReadFileName,
-			String		WriteFileName
-			)
-		{
-		try
-			{
-			// save name
-			this.ReadFileName = ReadFileName;
+        /// <summary>
+        ///  Decompress one file
+        /// </summary>
+        /// <param name="readFileName">Name of the read file.</param>
+        /// <param name="writeFileName">Name of the write file.</param>
+        /// <returns></returns>
+        /// <exception cref="UZipDotNet.Exception">No support for files over 4GB</exception>
+        public bool Decompress(string readFileName, string writeFileName)
+        {
+            try
+            {
+                // save name
+                _readFileName = readFileName;
 
-			// open source file for reading
-			ReadStream = new FileStream(ReadFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
-		
-			// convert stream to binary reader
-			ReadFile = new BinaryReader(ReadStream, Encoding.UTF8);
+                // open source file for reading
+                _readStream = new FileStream(readFileName, FileMode.Open, FileAccess.Read, FileShare.Read);
 
-			// file is too long
-			if(ReadStream.Length > (Int64) 0xffffffff) throw new ApplicationException("No support for files over 4GB");
+                // convert stream to binary reader
+                _readFile = new BinaryReader(_readStream, Encoding.UTF8);
 
-			// save file length
-			ReadRemain = (UInt32) ReadStream.Length;
-			ReadTotal = ReadRemain;
+                // file is too long
+                if (_readStream.Length > 0xffffffff) throw new Exception("No support for files over 4GB");
 
-			// save name
-			this.WriteFileName = WriteFileName;
+                // save file length
+                _readRemain = (uint)_readStream.Length;
+                ReadTotal = _readRemain;
 
-			// create destination file
-			WriteStream = new FileStream(WriteFileName, FileMode.Create, FileAccess.Write, FileShare.None);
+                // save name
+                _writeFileName = writeFileName;
 
-			// convert stream to binary writer
-			WriteFile = new BinaryWriter(WriteStream, Encoding.UTF8);
+                // create destination file
+                _writeStream = new FileStream(writeFileName, FileMode.Create, FileAccess.Write, FileShare.None);
 
-			// decompress the file
-			Decompress();
+                // convert stream to binary writer
+                _writeFile = new BinaryWriter(_writeStream, Encoding.UTF8);
 
-			// close read file
-			ReadFile.Dispose();
-			ReadFile = null;
+                // decompress the file
+                Decompress();
 
-			// save file length
-			WriteTotal = (UInt32) WriteStream.Length;
+                // close read file
+                _readFile.Dispose();
+                _readFile = null;
 
-			// close write file
-			WriteFile.Dispose();
-			WriteFile = null;
+                // save file length
+                WriteTotal = (uint)_writeStream.Length;
 
-			// successful exit
-			return(false);
-			}
+                // close write file
+                _writeFile.Dispose();
+                _writeFile = null;
 
-		// make sure read and write files are closed
-		catch(Exception Ex)
-			{
-			// close the read file if it is open
-			if(ReadFile != null)
-				{
-				ReadFile.Dispose();
-				ReadFile = null;
-				}
+                // successful exit
+                return (false);
+            }
 
-			// close the write file if it is open
-			if(WriteFile != null)
-				{
-				WriteFile.Dispose();
-				WriteFile = null;
-				}
+            // make sure read and write files are closed
+            catch (Exception)
+            {
+                // close the read file if it is open
+                if (_readFile != null)
+                {
+                    _readFile.Dispose();
+                    _readFile = null;
+                }
 
-			// error exit
-			ExceptionStack = ExceptionReport.GetMessageAndStack(this, Ex);
-			return(true);
-			}
-		}
+                // close the write file if it is open
+                if (_writeFile != null)
+                {
+                    _writeFile.Dispose();
+                    _writeFile = null;
+                }
 
-	////////////////////////////////////////////////////////////////////
-	// Read Bytes Routine
-	////////////////////////////////////////////////////////////////////
+                // error exit
+                //ExceptionStack = ExceptionReport.GetMessageAndStack(this, Ex);
+                return (true);
+            }
+        }
 
-	public override Int32 ReadBytes
-			(
-			Byte[]			Buffer,
-			Int32			Pos,
-			Int32			Len,
-			out Boolean		EndOfFile
-			)
-		{
-		Len = Len > ReadRemain ? (Int32) ReadRemain : Len;
-		ReadRemain -= (UInt32) Len;
-		ReadTotal += (UInt32) Len;
-		EndOfFile = ReadRemain == 0;
-		return(ReadFile.Read(Buffer, Pos, Len));
-		}
+        /// <summary>
+        ///  Read Bytes Routine
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        /// <param name="endOfFile">if set to <c>true</c> [end of file].</param>
+        /// <returns></returns>
+        protected override int ReadBytes(byte[] buffer, int pos, int len, out bool endOfFile)
+        {
+            len = len > _readRemain ? (int)_readRemain : len;
+            _readRemain -= (uint)len;
+            ReadTotal += (uint)len;
+            endOfFile = _readRemain == 0;
 
-	////////////////////////////////////////////////////////////////////
-	// Write Bytes Routine
-	////////////////////////////////////////////////////////////////////
+            return (_readFile.Read(buffer, pos, len));
+        }
 
-	public override void WriteBytes
-			(
-			Byte[]		Buffer,
-			Int32		Pos,
-			Int32		Len
-			)
-		{
-		WriteFile.Write(Buffer, Pos, Len);
-		WriteTotal += (UInt32) Len;
-		return;
-		}
-	}
+        /// <summary>
+        /// Writes the bytes.
+        /// </summary>
+        /// <param name="buffer">The buffer.</param>
+        /// <param name="pos">The position.</param>
+        /// <param name="len">The length.</param>
+        protected override void WriteBytes(byte[] buffer, int pos, int len)
+        {
+            _writeFile.Write(buffer, pos, len);
+            WriteTotal += (uint)len;
+        }
+
+        public override void Dispose()
+        {
+            //
+        }
+    }
 }

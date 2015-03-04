@@ -1,10 +1,10 @@
 ﻿using System.IO;
 
-namespace UZipDotNet.ConsoleApp
+namespace UZipDotNet.ConsoleApp.VS2013
 {
-    public class Program
+    class Program
     {
-        public void Main(string[] args)
+        static void Main(string[] args)
         {
             File.Delete(@"c:\temp\uziptest.zip");
 
