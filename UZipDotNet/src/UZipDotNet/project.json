@@ -1,7 +1,15 @@
 ﻿{
+    // NuGet settings
     "version": "0.0.2.0",
-    "authors": [ "Uzi Granot", "Stef Heyenrath" ],
     "description": "Compress and decompress ZIP files.",
+    "summary" :  "This project will give you the tools needed to compress and decompress files using the Deflate method of compression, and to read and write standard Zip files. The original source is copied from http://www.codeproject.com/Articles/359758/Processing-Standard-Zip-Files-with-Csharp-compress The original license is CPOL. The original author is Uzi Granot.",
+    "tags" : [ "ZIP", "compress", "decompress", "deflate", "inflate" ],
+    "authors": [ "Uzi Granot", "Stef Heyenrath" ],
+    "owners": [ "Stef Heyenrath" ],
+    "projectUrl": "https://github.com/StefH/UZipDotNet",
+    "releasenotes" :  "Initial version",
+    // NuGet settings
+
     "dependencies": {
     },
     "frameworks": {
@@ -14,7 +22,7 @@
         "aspnetcore50": {
             "dependencies": {
                 "System.Runtime": "4.0.20-beta-22605",
-                
+
                 "System.Collections": "4.0.10-beta-22605",
                 "System.Console": "4.0.0-beta-22605",
                 "System.IO": "4.0.10-beta-22605",
