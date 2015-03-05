@@ -1,23 +1,26 @@
 ﻿{
     "version": "0.0.2.0",
     "authors": [ "Uzi Granot", "Stef Heyenrath" ],
+    "description": "Compress and decompress ZIP files.",
     "dependencies": {
     },
-
     "frameworks": {
-        /*"aspnet50" : { 
-            "dependencies": {
-            }
-        },*/
+        "net40": {
+        },
+        "net45": {
+        },
+        "aspnet50": {
+        },
         "aspnetcore50": {
             "dependencies": {
-                "System.Runtime": "4.0.20-beta-22416",
-                "System.Text.Encoding": "4.0.10-beta-22231",
-                "System.Console": "4.0.0-beta-22416",
-                "System.IO": "4.0.10-beta-22416",
-                "System.IO.FileSystem": "4.0.0-beta-22416",
-                "System.Runtime.Extensions": "4.0.10-beta-22416",
-                "System.Collections": "4.0.10-beta-22416"
+                "System.Runtime": "4.0.20-beta-22605",
+                
+                "System.Collections": "4.0.10-beta-22605",
+                "System.Console": "4.0.0-beta-22605",
+                "System.IO": "4.0.10-beta-22605",
+                "System.IO.FileSystem": "4.0.0-beta-22605",
+                "System.Runtime.Extensions": "4.0.10-beta-22605",
+                "System.Text.Encoding": "4.0.10-beta-22605"
             }
         }
     }
