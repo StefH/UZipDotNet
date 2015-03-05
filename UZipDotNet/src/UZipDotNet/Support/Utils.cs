@@ -2,7 +2,7 @@ using System.Text;
 
 namespace UZipDotNet.Support
 {
-    public static class Utils
+    internal static class Utils
     {
 #if ASPNETCORE50
         private static Encoding Encoding = Encoding.UTF8;

@@ -26,7 +26,7 @@ namespace UZipDotNet.Support
     /// <summary>
     /// Accumulate Adler Checksum
     /// </summary>
-    public static class Adler32
+    internal static class Adler32
     {
         const uint Adler32Base = 65521;
 

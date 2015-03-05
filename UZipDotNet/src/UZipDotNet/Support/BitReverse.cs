@@ -26,7 +26,7 @@ namespace UZipDotNet.Support
     /// <summary>
     /// Reverse the bits of one byte
     /// </summary>
-    public static class BitReverse
+    internal static class BitReverse
     {
         private static readonly byte[] BitReverseTable =
         { 

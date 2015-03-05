@@ -26,7 +26,7 @@ namespace UZipDotNet.Support
     /// <summary>
     /// CRC32
     /// </summary>
-    public static class CRC32
+    internal static class CRC32
     {
         private static readonly uint[] CRC32Table =
         {
