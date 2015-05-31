@@ -4,7 +4,7 @@ namespace UZipDotNet.Support
 {
     internal static class Utils
     {
-#if ASPNETCORE50
+#if DNXCORE50
         private static Encoding Encoding = Encoding.UTF8;
 #else
         private static Encoding Encoding = Encoding.GetEncoding(437);

@@ -1,22 +1,25 @@
 ﻿{
     "version": "1.0.0-*",
     "authors": [ "Stef Heyenrath" ],
+
     "dependencies": {
-        "UZipDotNet": "0.0.2.0"
+        "UZipDotNet": "0.0.3.0"
     },
+
     "commands": {
         "run": "run"
     },
+
     "frameworks": {
         "net40": {
         },
         "net45": {
         },
-        "aspnet50": {
+        "dnx451": {
         },
-        "aspnetcore50": {
+        "dnxcore50": {
             "dependencies": {
-                "System.Console": "4.0.0-beta-22605"
+                "System.Console": "4.0.0-beta-*"
             }
         }
     }
