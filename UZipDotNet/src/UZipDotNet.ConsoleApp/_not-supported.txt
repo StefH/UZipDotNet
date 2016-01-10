@@ -1,0 +1,30 @@
+﻿??? System.IO.FileSystem ???
+
+
+"netcore45": {
+    "dependencies": {
+        "System.Runtime": "4.0.21-beta-*",
+        "System.Runtime.Extensions": "4.0.11-beta-*",
+
+        "System.Collections": "4.0.11-beta-*",
+
+        "System.IO": "4.0.11-beta-*",
+        "System.IO.FileSystem": "4.0.1-beta-*",
+
+        "System.Text.Encoding": "4.0.11-beta-*"
+    }
+},
+
+"netcore451": {
+        "dependencies": {
+            "System.Runtime": "4.0.21-beta-*",
+            "System.Runtime.Extensions": "4.0.11-beta-*",
+
+            "System.Collections": "4.0.11-beta-*",
+
+            "System.IO": "4.0.11-beta-*",
+            "System.IO.FileSystem": "4.0.1-rc2-23621",
+
+            "System.Text.Encoding": "4.0.11-beta-*"
+        }
+    },

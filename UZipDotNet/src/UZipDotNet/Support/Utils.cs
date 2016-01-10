@@ -1,3 +1,4 @@
+using System.IO;
 using System.Text;
 
 namespace UZipDotNet.Support
@@ -5,9 +6,9 @@ namespace UZipDotNet.Support
     internal static class Utils
     {
 #if DNXCORE50
-        private static Encoding Encoding = Encoding.UTF8;
+        private static readonly Encoding Encoding = Encoding.UTF8;
 #else
-        private static Encoding Encoding = Encoding.GetEncoding(437);
+        private static readonly Encoding Encoding = Encoding.GetEncoding(437);
 #endif
 
         /// <summary>
@@ -17,7 +18,7 @@ namespace UZipDotNet.Support
         /// <returns></returns>
         public static byte[] EncodeFilename(string filename)
         {
-            return Encoding.GetBytes(filename.Replace('\\', '/'));
+            return Encoding.GetBytes(filename.Replace(Path.DirectorySeparatorChar, '/'));
         }
 
         /// <summary>
@@ -28,7 +29,7 @@ namespace UZipDotNet.Support
         /// <returns></returns>
         public static string DecodeFilename(byte[] bytes)
         {
-            return Encoding.GetString(bytes).Replace('/', '\\');
+            return Encoding.GetString(bytes).Replace('/', Path.DirectorySeparatorChar);
         }
     }
 }

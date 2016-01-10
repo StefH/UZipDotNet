@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 
 namespace UZipDotNet.ConsoleApp
 {
@@ -6,24 +7,37 @@ namespace UZipDotNet.ConsoleApp
     {
         public void Main(string[] args)
         {
-            File.Delete(@"c:\temp\uziptest.zip");
+            string temp = args.Length > 0 ? args[0] : @"c:\temp";
+            string tempunzip = Path.Combine(temp, "unzip");
+            string filepath = Path.Combine(temp, "uziptest.zip");
 
-            using (var def = new DeflateZipFile(@"c:\temp\uziptest.zip"))
+            Console.WriteLine("start");
+            try
             {
-                // compress file
-                def.Compress("C:\\Tools\\test.msi", "test1.msi");
-                def.Compress("C:\\Tools\\test.msi", "test2.msi");
+                File.Delete(filepath);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Ignore : " + ex);
+            }
+
+            using (var def = new DeflateZipFile(filepath))
+            {
+                // compress files
+                def.Compress("../UZipDotNet/_frameworks.txt", "folder/_frameworks.txt");
+                def.Compress("../UZipDotNet/DeflateMethod.cs", "DeflateMethod.cs");
 
                 // save archive
                 def.Save();
             }
 
-
-            using (var inf = new InflateZipFile(@"c:\temp\uziptest.zip"))
+            // un-compress files
+            using (var inf = new InflateZipFile(filepath))
             {
-                inf.Decompress(inf.ZipDir[0], @"c:\temp\unzip", null, true, true);
-                inf.Decompress(inf.ZipDir[1], @"c:\temp\unzip", null, true, true);
+                inf.Decompress(inf.ZipDir[0], tempunzip, null, true, true);
+                inf.Decompress(inf.ZipDir[1], tempunzip, null, true, true);
             }
+            Console.WriteLine("end");
         }
     }
 }

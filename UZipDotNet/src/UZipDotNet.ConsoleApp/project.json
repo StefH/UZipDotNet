@@ -3,21 +3,40 @@
     "authors": [ "Stef Heyenrath" ],
 
     "dependencies": {
-        "UZipDotNet": "0.0.3.0"
+        "UZipDotNet": "0.0.4.0"
     },
 
     "commands": {
-        "run": "run"
+        "ConsoleApp": "run"
     },
 
     "frameworks": {
+        "net20": {
+        },
+        "net35": {
+        },
         "net40": {
         },
         "net45": {
         },
-        "dnx451": {
+        "net451": {
         },
-        "dnxcore50": {
+        "net452": {
+        },
+        "net46": {
+        },
+        "net461": {
+        },
+        "netcore50": {
+            "dependencies": {
+                "System.Console": "4.0.0-beta-*"
+            }
+        },
+        "dnx452": {
+            "dependencies": {
+            }
+        },
+        "dnxcore5": {
             "dependencies": {
                 "System.Console": "4.0.0-beta-*"
             }

@@ -27,6 +27,7 @@ using System;
 using System.IO;
 using System.Text;
 using System.Collections.Generic;
+using UZipDotNet.Extensions;
 using UZipDotNet.Support;
 
 namespace UZipDotNet
@@ -498,9 +499,12 @@ namespace UZipDotNet
                 _writeFile.Write((UInt32)0x0020000a);
                 _writeFile.Write((UInt32)0);
                 _writeFile.Write((UInt32)0x00180001);
-                _writeFile.Write(fi.LastWriteTime.ToFileTime());
-                _writeFile.Write((File.GetLastAccessTime(fullFileName).ToFileTime()));
-                _writeFile.Write((File.GetCreationTime(fullFileName).ToFileTime()));
+
+                var details = fi.GetFileTimeDetails();
+
+                _writeFile.Write(details.LastWriteTimeAsFileTime);
+                _writeFile.Write(details.LastAccessTimeAsFileTime);
+                _writeFile.Write(details.CreationTimeAsFileTime);
             }
 
             // save write file length for possible rewind
@@ -871,7 +875,7 @@ namespace UZipDotNet
                 //			if((FH.FileAttr & FileAttributes.Directory) != 0 && !FH.FileName.EndsWith("\\")) FH.FileName += "\\";
 
                 // find if file name contains a path
-                fh.Path = fh.FileName.Contains("\\");
+                fh.Path = fh.FileName.Contains(Path.DirectorySeparatorChar);
 
                 // if we have a directory, we must have a terminating slash
                 if ((fh.FileAttr & FileAttributes.Directory) != 0 && !fh.Path) throw new Exception("Directory name must have a slash");

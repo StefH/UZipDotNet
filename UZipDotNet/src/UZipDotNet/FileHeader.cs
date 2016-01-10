@@ -24,6 +24,7 @@
 
 using System;
 using System.IO;
+using UZipDotNet.Extensions;
 
 namespace UZipDotNet
 {
@@ -110,7 +111,7 @@ namespace UZipDotNet
         public FileHeader(string fileName, DateTime lastWriteTime, FileAttributes fileAttr, long filePos, long fileSize)
         {
             // test file name (error if file starts with c:\ or \ or \\name\)
-            if (fileName[0] == '\\' || fileName[1] == ':')
+            if (fileName == null || fileName[0] == System.IO.Path.DirectorySeparatorChar || fileName[1] == ':')
             {
                 throw new ArgumentException("Invalid file name", "fileName");
             }
@@ -119,7 +120,7 @@ namespace UZipDotNet
             FileName = fileName;
 
             // file name has a path component
-            Path = FileName.Contains("\\");
+            Path = FileName.Contains(System.IO.Path.DirectorySeparatorChar);
 
             // last mod file time
             FileTime = (ushort)((lastWriteTime.Hour << 11) | (lastWriteTime.Minute << 5) | (lastWriteTime.Second / 2));
