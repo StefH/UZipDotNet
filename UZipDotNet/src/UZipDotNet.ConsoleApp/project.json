@@ -32,6 +32,10 @@
                 "System.Console": "4.0.0-beta-*"
             }
         },
+        "dnx451": {
+            "dependencies": {
+            }
+        },
         "dnx452": {
             "dependencies": {
             }

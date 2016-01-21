@@ -302,6 +302,34 @@
         }
       }
     },
+    "DNX,Version=v4.5.1": {
+      "System.Collections/4.0.11-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime/4.0.21-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "UZipDotNet/0.0.4": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "System.Collections": "4.0.11-beta",
+          "System.Runtime": "4.0.21-beta"
+        }
+      }
+    },
     "DNX,Version=v4.5.2": {
       "System.Collections/4.0.11-beta-23516": {
         "type": "package",
@@ -1283,6 +1311,62 @@
           "System.Runtime": "4.0.21-beta",
           "System.Runtime.Extensions": "4.0.11-beta",
           "System.Text.Encoding": "4.0.11-beta"
+        }
+      }
+    },
+    "DNX,Version=v4.5.1/win7-x86": {
+      "System.Collections/4.0.11-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime/4.0.21-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "UZipDotNet/0.0.4": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "System.Collections": "4.0.11-beta",
+          "System.Runtime": "4.0.21-beta"
+        }
+      }
+    },
+    "DNX,Version=v4.5.1/win7-x64": {
+      "System.Collections/4.0.11-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "System.Runtime/4.0.21-beta-23516": {
+        "type": "package",
+        "compile": {
+          "ref/net45/_._": {}
+        },
+        "runtime": {
+          "lib/net45/_._": {}
+        }
+      },
+      "UZipDotNet/0.0.4": {
+        "type": "project",
+        "framework": "DNX,Version=v4.5.1",
+        "dependencies": {
+          "System.Collections": "4.0.11-beta",
+          "System.Runtime": "4.0.21-beta"
         }
       }
     },
@@ -3117,6 +3201,7 @@
     ".NETCore,Version=v5.0": [
       "System.Console >= 4.0.0-beta-*"
     ],
+    "DNX,Version=v4.5.1": [],
     "DNX,Version=v4.5.2": [],
     "DNXCore,Version=v5.0": [
       "System.Console >= 4.0.0-beta-*"

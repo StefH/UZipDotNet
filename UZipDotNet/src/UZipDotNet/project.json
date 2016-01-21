@@ -17,8 +17,9 @@
 
     "frameworks": {
         "net20": {
-            "dependencies": { 
-                "LINQBridge": "1.3.0" }
+            "dependencies": {
+                "LINQBridge": "1.3.0"
+            }
         },
         "net35": {
         },
@@ -45,6 +46,12 @@
                 "System.IO.FileSystem": "4.0.1-beta-*",
 
                 "System.Text.Encoding": "4.0.11-beta-*"
+            }
+        },
+        "dnx451": {
+            "dependencies": {
+                "System.Runtime": "4.0.21-beta-*",
+                "System.Collections": "4.0.11-beta-*"
             }
         },
         "dnx452": {
