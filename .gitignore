@@ -5,3 +5,4 @@ obj/
 *.suo
 /UZipDotNet/src/UZipDotNet/UZipDotNet.xproj.user
 /UZipDotNet/src/UZipDotNet.ConsoleApp/UZipDotNet.ConsoleApp.xproj.user
+project.lock.json

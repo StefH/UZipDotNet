@@ -1,12 +1,12 @@
 ﻿{
-    "version": "0.0.4.0",
+    "version": "0.0.5",
     "description": "Compress and decompress ZIP files.",
     "summary": "This project will give you the tools needed to compress and decompress files using the Deflate method of compression, and to read and write standard Zip files. The original source is copied from http://www.codeproject.com/Articles/359758/Processing-Standard-Zip-Files-with-Csharp-compress The original license is CPOL. The original author is Uzi Granot.",
     "tags": [ "ZIP", "compress", "decompress", "deflate", "inflate" ],
     "authors": [ "Uzi Granot", "Stef Heyenrath" ],
     "owners": [ "Stef Heyenrath" ],
     "projectUrl": "https://github.com/StefH/UZipDotNet",
-    "releasenotes": "Added more frameworks and make compatible for Linux.",
+    "releasenotes": "",
 
     "tooling": {
         "defaultNamespace": "UZipDotNet"

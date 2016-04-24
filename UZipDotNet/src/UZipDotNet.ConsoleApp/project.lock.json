@@ -12,7 +12,7 @@
           "lib/net20/LinqBridge.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v2.0",
         "dependencies": {
@@ -21,43 +21,43 @@
       }
     },
     ".NETFramework,Version=v3.5": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v3.5"
       }
     },
     ".NETFramework,Version=v4.0": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.0"
       }
     },
     ".NETFramework,Version=v4.5": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5"
       }
     },
     ".NETFramework,Version=v4.5.1": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1"
       }
     },
     ".NETFramework,Version=v4.5.2": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.2"
       }
     },
     ".NETFramework,Version=v4.6": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       }
     },
     ".NETFramework,Version=v4.6.1": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1"
       }
@@ -289,7 +289,7 @@
           "lib/wpa81/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETCore,Version=v5.0",
         "dependencies": {
@@ -321,7 +321,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.1",
         "dependencies": {
@@ -349,7 +349,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.2",
         "dependencies": {
@@ -481,7 +481,7 @@
           "ref/dotnet/System.Threading.Tasks.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -504,7 +504,7 @@
           "lib/net20/LinqBridge.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v2.0",
         "dependencies": {
@@ -522,7 +522,7 @@
           "lib/net20/LinqBridge.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v2.0",
         "dependencies": {
@@ -531,85 +531,85 @@
       }
     },
     ".NETFramework,Version=v3.5/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v3.5"
       }
     },
     ".NETFramework,Version=v3.5/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v3.5"
       }
     },
     ".NETFramework,Version=v4.0/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.0"
       }
     },
     ".NETFramework,Version=v4.0/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.0"
       }
     },
     ".NETFramework,Version=v4.5/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5"
       }
     },
     ".NETFramework,Version=v4.5/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5"
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1"
       }
     },
     ".NETFramework,Version=v4.5.1/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.1"
       }
     },
     ".NETFramework,Version=v4.5.2/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.2"
       }
     },
     ".NETFramework,Version=v4.5.2/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.5.2"
       }
     },
     ".NETFramework,Version=v4.6/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       }
     },
     ".NETFramework,Version=v4.6/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6"
       }
     },
     ".NETFramework,Version=v4.6.1/win7-x86": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1"
       }
     },
     ".NETFramework,Version=v4.6.1/win7-x64": {
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1"
       }
@@ -951,7 +951,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETCore,Version=v5.0",
         "dependencies": {
@@ -1301,7 +1301,7 @@
           "lib/netcore50/System.Threading.Tasks.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": ".NETCore,Version=v5.0",
         "dependencies": {
@@ -1333,7 +1333,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.1",
         "dependencies": {
@@ -1361,7 +1361,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.1",
         "dependencies": {
@@ -1389,7 +1389,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.2",
         "dependencies": {
@@ -1417,7 +1417,7 @@
           "lib/net45/_._": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNX,Version=v4.5.2",
         "dependencies": {
@@ -1714,7 +1714,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -2015,7 +2015,7 @@
           "lib/DNXCore50/System.Threading.Tasks.dll": {}
         }
       },
-      "UZipDotNet/0.0.4": {
+      "UZipDotNet/0.0.5": {
         "type": "project",
         "framework": "DNXCore,Version=v5.0",
         "dependencies": {
@@ -2030,7 +2030,7 @@
     }
   },
   "libraries": {
-    "UZipDotNet/0.0.4": {
+    "UZipDotNet/0.0.5": {
       "type": "project",
       "path": "../UZipDotNet/project.json"
     },
@@ -2048,7 +2048,7 @@
     "runtime.win7.System.Console/4.0.0-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "pfQrTtnYcWOtI3RrpqjAzwT3I55ivTVZFpbKYG59dYTTvaLFGbs2njc/mrXHij6GylyJ2YjekS/9r6I8X3LV1A==",
+      "sha512": "TJZhrw44Bf7sYqne+CX5II/PaNf5L7oKVfl0FLkr4pj76KS8hSsJzsKL0IvxC+bi4d51+wTbv91kF1kgPyHMVw==",
       "files": [
         "ref/dotnet/_._",
         "runtime.win7.System.Console.4.0.0-beta-23516.nupkg",
@@ -2061,7 +2061,7 @@
     "runtime.win7.System.IO.FileSystem/4.0.1-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "UOHEVg3jQwsvy3b+8zhDk7BQ9GhHY1KcjHSuqArzIl7oemcM/+D7OfS5iOA96ydjEv9FmIKV3knkXMge+cUD0Q==",
+      "sha512": "PwsqcwAui7Ld6Ad32RjoHF3wBSEkEzvv5ka605IsaWxHSCfmmwevJnIbNgwJgBTao/uR+wSO9yoyvfrB109BfQ==",
       "files": [
         "ref/dotnet/_._",
         "runtime.win7.System.IO.FileSystem.4.0.1-beta-23516.nupkg",
@@ -2078,7 +2078,7 @@
     "runtime.win7.System.Private.Uri/4.0.1-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "HphDhue34J/4+1rIMtInY1FWK1oLEMpxIpxGeNnhIlQf7hv5QDf05aWEC6180qbgkPBCFwyGnwWRBnONApwbBQ==",
+      "sha512": "dENjtxxx1L+OXWnxGRzeAD8mJC//NljPPLXNWg1H5BG6IB4YTLzBSzfeCOZQVpQaKfCYE7Mzjq12uCVZpBG4vg==",
       "files": [
         "ref/dotnet/_._",
         "runtime.win7.System.Private.Uri.4.0.1-beta-23516.nupkg",
@@ -2092,7 +2092,7 @@
     "runtime.win7.System.Runtime.Extensions/4.0.11-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "Jm+LAzN7CZl1BZSxz4TsMBNy1rHNqyY/1+jxZf3BpF7vkPlWRXa/vSfY0lZJZdy4Doxa893bmcCf9pZNsJU16Q==",
+      "sha512": "V4HbLYv2m4LaL+Kl+x6wz8Xl9TyrHBpA/lYq+w6J35mYY9ACCVV+YkHRJdNuRd3Qe3DEz9X8D1S8uWnKMyHvvg==",
       "files": [
         "lib/DNXCore50/System.Runtime.Extensions.dll",
         "lib/netcore50/System.Runtime.Extensions.dll",
@@ -2106,7 +2106,7 @@
     "System.Collections/4.0.11-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "TDca4OETV0kkXdpkyivMw1/EKKD1Sa/NVAjirw+fA0LZ37jLDYX+KhPPUQxgkvhCe/SVvxETD5Viiudza2k7OQ==",
+      "sha512": "FSd5zsGfmG2pidC3CVizQPNGTK1Q3A2HEuRqwUPLU/AArjELLC5p4l6XIAlJ9ZBPdbp6V8vFQAxUHzkFfyVkYA==",
       "files": [
         "lib/DNXCore50/System.Collections.dll",
         "lib/MonoAndroid10/_._",
@@ -2330,7 +2330,7 @@
     "System.IO/4.0.11-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "dR1DaWrF0zsV2z/GVs8xVvMds6xu0ykuwv+VPou8wbpJ1XxGBK9g6v5F84DWL8Q1qi+6Kyb56wbZYdYQO8OMew==",
+      "sha512": "6nJmAk4vYjN+5/haenkKk/BDGCOKw5pk5EjXAOvBnUM5PFIfO8JwUxGbcveOD4vV5Vb6TAxrmRmts/7F+BEuEw==",
       "files": [
         "lib/DNXCore50/System.IO.dll",
         "lib/MonoAndroid10/_._",
@@ -2392,7 +2392,7 @@
     "System.IO.FileSystem/4.0.1-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "KOYNQ6FeLQh0HdHVlp6IRjRGPCjyFvZRKfhYSDFi7DR0EHY3cC2rvfVj5HWJEW5KlSaa01Ct25m06yVnqSxwOQ==",
+      "sha512": "xggWMgLzKnBisYTx5HW3og8qRR7TjmorQAdsAQOaMcY4I9CQA6JUxw0r2AvCC1+ToXh0CuO7J6dymX33pkmwbA==",
       "files": [
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -2455,7 +2455,7 @@
     },
     "System.Private.Uri/4.0.1-beta-23516": {
       "type": "package",
-      "sha512": "MG79ArOc8KhfAkjrimI5GFH4tML7XFo+Z1sEQGLPxrBlwfbITwrrNfYb3YoH6CpAlJHc4pcs/gZrUas/pEkTdg==",
+      "sha512": "PISxTW5FSZw8cQ8DOvq2pHHz48mok3ex0/QU2gcHG5PACvobxaXQl2oR345vqOx6C15l10bJPVkKZlgi2Ic4KQ==",
       "files": [
         "ref/dnxcore50/_._",
         "ref/netcore50/_._",
@@ -2617,7 +2617,7 @@
     "System.Runtime/4.0.21-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "R174ctQjJnCIVxA2Yzp1v68wfLfPSROZWrbaSBcnEzHAQbOjprBQi37aWdr5y05Pq2J/O7h6SjTsYhVOLdiRYQ==",
+      "sha512": "ToYWwDgwR8fR9/8aaV+7PMFBfG2tEgGWED0l9OC9DQieaKEMAzXV3c6fOkK8FTd9YPjFcYnvx73tg21w6GuNDA==",
       "files": [
         "lib/DNXCore50/System.Runtime.dll",
         "lib/MonoAndroid10/_._",
@@ -2690,7 +2690,7 @@
     "System.Runtime.Extensions/4.0.11-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "HX4wNPrcCV9D+jpbsJCRPuVJbcDM+JobSotQWKq40lCq0WJbJi+0lNQ/T1zHEdWcf4W2PmtMkug1rW7yKW9PiQ==",
+      "sha512": "mpKQVIySlFSvgQkeb9qvXxHOY3jV7H9x5DmPSeNac0APFOG9ROufrMozY3VP/GxBWu4AVS/HDG1lUxg/riE4ew==",
       "files": [
         "lib/MonoAndroid10/_._",
         "lib/MonoTouch10/_._",
@@ -2856,7 +2856,7 @@
     "System.Text.Encoding/4.0.11-beta-23516": {
       "type": "package",
       "serviceable": true,
-      "sha512": "gk4da/Y3VReZpIeQ3UDTCknbkO/FuYKOJtP+5+Vtc07mTcPHvhgbZLXEGTTneP6yWPDWTTh20nZZMF/19YsRtA==",
+      "sha512": "OnM2cqPXeOKF8cwgIAygYeCSKsJL7gjBDi3tI8lEaJSdnt4nM3/k4i1+p73oXn8a8tEcFRNvrvNuqsdqxYixXQ==",
       "files": [
         "lib/DNXCore50/System.Text.Encoding.dll",
         "lib/MonoAndroid10/_._",
