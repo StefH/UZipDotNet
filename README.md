@@ -1,4 +1,7 @@
 # UZipDotNet
+
+[![Build status](https://ci.appveyor.com/api/projects/status/nbm60f2wduyi53tt?svg=true)](https://ci.appveyor.com/project/StefH/uzipdotnet)
+
 This project will give you the tools needed to compress and decompress files using the Deflate method of compression, and to read and write standard Zip files.
 
 Info:
