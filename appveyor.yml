@@ -1,8 +1,34 @@
 os: Visual Studio 2015
 
-install:
-- dnvm upgrade -r clr
-- dnu restore
+version: 0.0.6.{build}
 
-build:
-  verbosity: minimal
+configuration:
+- Debug
+- Release
+
+platform: Any CPU
+
+init:
+- ps: $Env:LABEL = "CI" + $Env:APPVEYOR_BUILD_NUMBER.PadLeft(5, "0")
+
+install:
+- ps: Start-FileDownload 'https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-dev-win-x64.latest.exe'
+- cmd: dotnet-dev-win-x64.latest.exe /quiet
+
+environment:
+  PATH: $(PATH);$(PROGRAMFILES)\dotnet\
+
+build_script:
+- appveyor-retry dotnet restore .\UZipDotNet\src\UZipDotNet -v Minimal
+- appveyor-retry dotnet restore .\UZipDotNet\src\UZipDotNet.ConsoleApp -v Minimal
+
+- dotnet build .\UZipDotNet\src\UZipDotNet\project.json -c %CONFIGURATION%
+- dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\project.json -c %CONFIGURATION%
+
+- dotnet pack -c %CONFIGURATION% --no-build --version-suffix %LABEL% -o .\artifacts .\UZipDotNet\src\UZipDotNet\project.json
+
+artifacts:
+- path: artifacts\**\*.*
+
+cache:
+- '%USERPROFILE%\.nuget\packages'

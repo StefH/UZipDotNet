@@ -5,7 +5,7 @@ namespace UZipDotNet.ConsoleApp
 {
     public class Program
     {
-        public void Main(string[] args)
+        public static void Main(string[] args)
         {
             string temp = args.Length > 0 ? args[0] : @"c:\temp";
             string tempunzip = Path.Combine(temp, "unzip");

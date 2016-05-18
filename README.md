@@ -17,7 +17,7 @@ I've updated the code with support for more frameworks:
 * net45x
 * net46x
 * netcore50
-* dnx45x
+* dnx451
 * dnxcore5
 
 And it's tested in Linux.

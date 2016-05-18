@@ -39,21 +39,9 @@ namespace UZipDotNet
             return inflate != null && inflate._readFile != null;
         }
 
-        public String ArchiveName
-        {
-            get
-            {
-                return (_readFileName);
-            }
-        }
+        public String ArchiveName => (_readFileName);
 
-        public bool IsEmpty
-        {
-            get
-            {
-                return _readFile == null || ZipDir == null || ZipDir.Count == 0;
-            }
-        }
+        public bool IsEmpty => _readFile == null || ZipDir == null || ZipDir.Count == 0;
         public List<FileHeader> ZipDir;
         public long ZipDirPosition;
         public uint ReadTotal;

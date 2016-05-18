@@ -2,47 +2,25 @@
     "version": "1.0.0-*",
     "authors": [ "Stef Heyenrath" ],
 
-    "dependencies": {
-        "UZipDotNet": "0.0.4.0"
+    "buildOptions": {
+        "emitEntryPoint": true
     },
 
-    "commands": {
-        "ConsoleApp": "run"
+    "dependencies": {
+        "Microsoft.NETCore.App": {
+            "type": "platform",
+            "version": "1.0.0-rc2-*"
+        },
+        "UZipDotNet": { "target": "project" }
     },
 
     "frameworks": {
-        "net20": {
-        },
-        "net35": {
-        },
-        "net40": {
-        },
-        "net45": {
-        },
-        "net451": {
-        },
-        "net452": {
-        },
-        "net46": {
-        },
-        "net461": {
-        },
-        "netcore50": {
+        "netcoreapp1.5": {
+            "imports": [
+                "dotnet5.4",
+                "portable-net451+win8"
+            ],
             "dependencies": {
-                "System.Console": "4.0.0-beta-*"
-            }
-        },
-        "dnx451": {
-            "dependencies": {
-            }
-        },
-        "dnx452": {
-            "dependencies": {
-            }
-        },
-        "dnxcore5": {
-            "dependencies": {
-                "System.Console": "4.0.0-beta-*"
             }
         }
     }
