@@ -19,5 +19,8 @@ I've updated the code with support for more frameworks:
 * netcore50
 * dnx451
 * dnxcore5
+* netstandard1.3
+* netstandard1.4
+* netstandard1.5
 
 And it's tested in Linux.
