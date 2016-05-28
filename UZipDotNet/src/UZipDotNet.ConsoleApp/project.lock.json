@@ -1928,12 +1928,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.5",
         "dependencies": {
-          "System.Collections": "4.0.11-rc2",
-          "System.IO": "4.1.0-rc2",
-          "System.IO.FileSystem": "4.0.1-rc2",
-          "System.Runtime": "4.1.0-rc2",
-          "System.Runtime.Extensions": "4.1.0-rc2",
-          "System.Text.Encoding": "4.0.11-rc2"
+          "System.Collections": "4.0.11-rc2-24027",
+          "System.IO": "4.1.0-rc2-24027",
+          "System.IO.FileSystem": "4.0.1-rc2-24027",
+          "System.Runtime": "4.1.0-rc2-24027",
+          "System.Runtime.Extensions": "4.1.0-rc2-24027",
+          "System.Text.Encoding": "4.0.11-rc2-24027"
         },
         "compile": {
           "netstandard1.5/UZipDotNet.dll": {}
@@ -6424,7 +6424,7 @@
   },
   "projectFileDependencyGroups": {
     "": [
-      "Microsoft.NETCore.App >= 1.0.0-rc2-*",
+      "Microsoft.NETCore.App >= 1.0.0-rc2-24027",
       "UZipDotNet"
     ],
     ".NETCoreApp,Version=v1.5": []
