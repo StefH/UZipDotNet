@@ -19,7 +19,7 @@ environment:
   PATH: $(PATH);$(PROGRAMFILES)\dotnet\
 
 build_script:
-- dotnet restore .\UZipDotNet\src\UZipDotNet.UZipDotNet.csproj
+- dotnet restore .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj
 - dotnet restore .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj
 
 - dotnet build .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj -c %CONFIGURATION%
