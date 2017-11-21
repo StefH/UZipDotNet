@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <Authors>Stef Heyenrath</Authors>
+    <TargetFramework>netcoreapp2.0</TargetFramework>
+    <AssemblyName>UZipDotNet.ConsoleApp</AssemblyName>
+    <OutputType>Exe</OutputType>
+    <PackageId>UZipDotNet.ConsoleApp</PackageId>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\UZipDotNet\UZipDotNet.csproj" />
+  </ItemGroup>
+
+</Project>

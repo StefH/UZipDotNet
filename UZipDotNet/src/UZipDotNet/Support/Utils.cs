@@ -5,7 +5,7 @@ namespace UZipDotNet.Support
 {
     internal static class Utils
     {
-#if DNXCORE50 || NETSTANDARD
+#if NETSTANDARD
         private static readonly Encoding Encoding = Encoding.UTF8;
 #else
         private static readonly Encoding Encoding = Encoding.GetEncoding(437);

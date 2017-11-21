@@ -1,11 +1,11 @@
 ﻿using System;
 using System.IO;
 
-namespace UZipDotNet.ConsoleApp
+namespace UZipDotNet.ConsoleApp.net452
 {
-    public class Program
+    class Program
     {
-        public static void Main(string[] args)
+        static void Main(string[] args)
         {
             string temp = args.Length > 0 ? args[0] : @"c:\temp";
             string tempunzip = Path.Combine(temp, "unzip");

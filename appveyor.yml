@@ -3,7 +3,6 @@ os: Visual Studio 2015
 version: 0.0.6.{build}
 
 configuration:
-- Debug
 - Release
 
 platform: Any CPU
@@ -12,20 +11,19 @@ init:
 - ps: $Env:LABEL = "CI" + $Env:APPVEYOR_BUILD_NUMBER.PadLeft(5, "0")
 
 install:
-- ps: Start-FileDownload 'https://dotnetcli.blob.core.windows.net/dotnet/beta/Installers/Latest/dotnet-dev-win-x64.latest.exe'
-- cmd: dotnet-dev-win-x64.latest.exe /quiet
+  - ps: Start-FileDownload 'https://download.microsoft.com/download/D/7/2/D725E47F-A4F1-4285-8935-A91AE2FCC06A/dotnet-sdk-2.0.3-win-gs-x64.exe'
+  - cmd: dotnet-sdk-2.0.3-win-gs-x64.exe /quiet
+  - ps: $env:DOTNET_SKIP_FIRST_TIME_EXPERIENCE = "true"
 
 environment:
   PATH: $(PATH);$(PROGRAMFILES)\dotnet\
 
 build_script:
-- appveyor-retry dotnet restore .\UZipDotNet\src\UZipDotNet -v Minimal
-- appveyor-retry dotnet restore .\UZipDotNet\src\UZipDotNet.ConsoleApp -v Minimal
+- dotnet restore .\UZipDotNet\src\UZipDotNet.UZipDotNet.csproj
+- dotnet restore .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj
 
-- dotnet build .\UZipDotNet\src\UZipDotNet\project.json -c %CONFIGURATION%
-- dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\project.json -c %CONFIGURATION%
-
-- dotnet pack -c %CONFIGURATION% --no-build --version-suffix %LABEL% -o .\artifacts .\UZipDotNet\src\UZipDotNet\project.json
+- dotnet build .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj -c %CONFIGURATION%
+- dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj-c %CONFIGURATION%
 
 artifacts:
 - path: artifacts\**\*.*

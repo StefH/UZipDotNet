@@ -414,7 +414,6 @@ namespace UZipDotNet
         /// </summary>
         /// <param name="fullFileName">Full name of the file.</param>
         /// <param name="archiveFileName">Name of the archive file.</param>
-        /// <exception cref="UZipDotNet.Exception">Duplicate file name</exception>
         private void WriteFileHeader(string fullFileName, string archiveFileName)
         {
             //

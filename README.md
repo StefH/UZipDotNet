@@ -13,14 +13,8 @@ I've updated the code with support for more frameworks:
 * net20
 * net35
 * net40
-* net45
-* net45x
-* net46x
-* netcore50
-* dnx451
-* dnxcore5
+* net45 and higher
 * netstandard1.3
-* netstandard1.4
-* netstandard1.5
+* netstandard2.0
 
 And it's tested in Linux.
