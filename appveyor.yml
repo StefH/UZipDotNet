@@ -24,9 +24,3 @@ build_script:
 
 - dotnet build .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj -c %CONFIGURATION% --framework netstandard2.0
 - dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj -c %CONFIGURATION%
-
-artifacts:
-- path: artifacts\**\*.*
-
-cache:
-- '%USERPROFILE%\.nuget\packages'
