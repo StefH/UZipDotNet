@@ -22,8 +22,8 @@ build_script:
 - dotnet restore .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj
 - dotnet restore .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj
 
-- dotnet build .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj -c %CONFIGURATION%
-- dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj-c %CONFIGURATION%
+- dotnet build .\UZipDotNet\src\UZipDotNet\UZipDotNet.csproj -c %CONFIGURATION% --framework netstandard2.0
+- dotnet build .\UZipDotNet\src\UZipDotNet.ConsoleApp\UZipDotNet.ConsoleApp.csproj-c %CONFIGURATION% --framework netstandard2.0
 
 artifacts:
 - path: artifacts\**\*.*
